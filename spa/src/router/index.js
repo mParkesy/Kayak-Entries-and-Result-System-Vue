@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import HelloWorld from '@/components/HelloWorld'
+import App from '../App'
+import RaceResult from "../components/RaceResult";
+import Races from "../components/Races";
 
 Vue.use(Router)
 
@@ -8,8 +10,19 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'HelloWorld',
-      component: HelloWorld
-    }
+      name: 'App',
+      component: App
+    },
+    {
+      path: '/races',
+      name: 'races',
+      component: Races
+    },
+    {
+      path: '/raceresult/:id',
+      name: 'raceresult',
+      component: RaceResult
+    },
+
   ]
 })
