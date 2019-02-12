@@ -1,9 +1,9 @@
 <template>
-  <div id="RaceResult">
+  <div id="RaceResult" class="col-lg-10 mx-auto pt-4">
     <h1> {{ this.racename }}</h1>
     <div v-for="result in race">
       <h2 style="text-align: left; font-size: 28px; font-weight: 600; padding-left: 20px;"> {{ result[0].raceDivision }} </h2>
-      <table class="table">
+      <table class="table table-bordered col-lg-12 mx-auto mt-2" >
         <thead class="thead-dark">
         <tr>
           <th scope="col">Position</th>

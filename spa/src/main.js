@@ -9,12 +9,27 @@ import BootstrapVue from 'bootstrap-vue'
 Vue.use(BootstrapVue);
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import './assets/css/style.css';
+
+import VueSweetAlert from 'vue-sweetalert'
+Vue.use(VueSweetAlert);
+
+import Axios from 'axios'
+Vue.prototype.$http = Axios;
 
 Vue.component("RaceResult", {
 
 })
 
 Vue.component("Races", {
+
+})
+
+Vue.component("Paddler", {
+
+})
+
+Vue.component("Login", {
 
 })
 
