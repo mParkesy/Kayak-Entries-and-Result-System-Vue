@@ -14,8 +14,7 @@ import './assets/css/style.css';
 import VueSweetAlert from 'vue-sweetalert'
 Vue.use(VueSweetAlert);
 
-import Axios from 'axios'
-Vue.prototype.$http = Axios;
+
 
 Vue.component("RaceResult", {
 
@@ -32,6 +31,15 @@ Vue.component("Paddler", {
 Vue.component("Login", {
 
 })
+
+import Axios from 'axios'
+
+
+const base = Axios.create({
+  baseURL: 'http://localhost:3000'
+})
+
+Vue.prototype.$http = base;
 
 /* eslint-disable no-new */
 new Vue({

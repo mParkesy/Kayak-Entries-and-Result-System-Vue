@@ -31,7 +31,7 @@
                   <option value="1">Race Organiser</option>
                 </select>
               </div>
-                <button class="btn btn-lg btn-primary btn-block" type="submit" @click="handleSubmit">Submit</button>
+                <b-button size="lg" variant="primary" block type="submit" @click="handleSubmit">Register</b-button>
             </form>
           </div>
         </div>
@@ -60,7 +60,7 @@
           let _this= this;
           e.preventDefault()
           if (this.password === this.confirm_password && this.password.length > 0){
-            this.$http.post('http://localhost:8888/register', {
+            this.$http.post('/register', {
               email: this.email,
               password: this.password,
               name: this.name,

@@ -43,11 +43,13 @@
           if(this.search.length >= 3){
             this.dropdown = true;
             this.$http
-              .get('http://localhost:8888/search?term=' + this.search)
+              .get('search?term=' + this.search)
               .then(response => {
                 this.paddlers = response.data.response;
-                if(this.paddlers === null){
-                  _this.$swal("No search results", error.response.data, "error");
+                if(this.paddlers.length === 0){
+                  _this.$swal("No search results", "", "error");
+                } else if (this.paddlers.length === 1){
+                  this.handlePaddler(this.paddlers[0]);
                 }
               })
               .catch(error => {
@@ -60,7 +62,7 @@
         handlePaddler(paddler) {
           let _this= this;
           this.$http
-            .get('http://localhost:8888/paddlerstats?id=' + paddler.paddlerID)
+            .get('/paddlerstats?id=' + paddler.paddlerID)
             .then(response => {
               this.paddlerClicked = true;
               this.dropdown = false;
