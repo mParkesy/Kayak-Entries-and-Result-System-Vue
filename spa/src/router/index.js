@@ -9,6 +9,7 @@ import Login from '../components/Login'
 import Register from '../components/Register'
 import TeamLeader from '../components/TeamLeader'
 import RaceOrganiser from '../components/RaceOrganiser'
+import NotFound from '../components/NotFound'
 
 Vue.use(Router)
 
@@ -61,6 +62,16 @@ let router = new Router({
         is_organiser: true
       }
     },
+    {
+      path: '/404',
+      name: '404',
+      component: NotFound
+    },
+    {
+      path: '/*',
+      name: 'redirect',
+      redirect: '/404'
+    }
 
   ]
 })
