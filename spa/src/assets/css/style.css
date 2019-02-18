@@ -169,6 +169,11 @@ img::-moz-selection {
   background-image: url("../img/header4.jpg");
   background-position: center center;
   background-size: cover;
+  height: calc(100vh - 56px) !important;
+}
+
+header {
+  height: calc(100vh - 56px);
 }
 
 .masthead hr {
@@ -213,31 +218,19 @@ img::-moz-selection {
   font-weight: 700;
   text-transform: uppercase;
   border: none;
-  border-radius: 300px;
+  border-radius: 10px;
   font-family: 'Open Sans', 'Helvetica Neue', Arial, sans-serif;
 }
 
-.btn-xl {
-  padding: 1rem 2rem;
-}
-
 .btn-primary {
-  background-color: #D50826;
+  background-color: rgb(248, 108, 107);
 }
 
-/*
+
 .btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary:visited {
-  background-color: #09377F !important;
-  color: #fff;
+  background-color: red !important;
 }
 
-
-.btn-light:hover, .btn-light:focus, .btn-light:active, .btn-light:visited {
-    color: #fff;
-    background-color: #D50826;
-}
-
-*/
 
 .scrollDiv {
   height:700px;
