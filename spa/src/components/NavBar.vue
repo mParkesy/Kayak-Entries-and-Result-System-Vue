@@ -3,7 +3,7 @@
 
     <b-navbar-toggle target="nav_collapse" ></b-navbar-toggle>
 
-    <b-navbar-brand v-bind:to="'/'">HBRM <img src="../assets/img/canoe.svg" alt="Canoe" style="width: 30px; height: 30px;"/></b-navbar-brand>
+    <b-navbar-brand v-bind:to="'/'">HBRM <img src="../assets/img/canoe.svg" alt="Canoe" style="width: 25px; height: 25px;"/></b-navbar-brand>
 
     <b-collapse is-nav id="nav_collapse" >
 
@@ -13,10 +13,11 @@
         <b-nav-item v-bind:to="{ name: 'home'}">Home</b-nav-item>
           <b-nav-item v-bind:to="{ name: 'races'}">Races</b-nav-item>
         <b-nav-item v-bind:to="{ name: 'paddler'}">Paddler</b-nav-item>
-        <b-nav-item v-if="normal" v-bind:to="{ name: 'login'}">Login</b-nav-item>
-        <b-nav-item v-if="normal" v-bind:to="{ name: 'register'}">Register</b-nav-item>
-        <b-nav-item v-if="organiser" v-bind:to="{ name: 'raceorganiser'}">Race Organiser</b-nav-item>
-        <b-nav-item v-if="teamleader" v-bind:to="{ name: 'raceorganiser'}">Race Organiser</b-nav-item>
+        <b-nav-item v-bind:to="{ name: 'login'}">Login</b-nav-item>
+        <b-nav-item v-bind:to="{ name: 'register'}">Register</b-nav-item>
+        <b-nav-item v-bind:to="{ name: 'raceorganiser'}">Race Organiser</b-nav-item>
+        <b-nav-item v-bind:to="{ name: 'teamleader'}">Team Leader</b-nav-item>
+        <b-nav-item v-on:click="logout">Log Out</b-nav-item>
       </b-navbar-nav>
 
     </b-collapse>
@@ -35,7 +36,7 @@
             organiser: false,
           }
         },
-        created () {
+        mounted () {
           let _this= this;
           let user = JSON.parse(localStorage.getItem('user'));
           let jwt = localStorage.getItem('jwt');
@@ -47,22 +48,34 @@
                 let organiser_check = response.data.response[0];
                 console.log(organiser_check);
                 if(organiser_check.organiser > 0) {
-                  this.organiser = true;
-                  this.normal = false;
+                  _this.organiser = true;
+                  _this.normal = false;
                 } else if(organiser_check.account == 0) {
-                  this.teamleader = true;
-                  this.normal = false;
+                  _this.teamleader = true;
+                  _this.normal = false;
                 }
               })
               .catch(error => {
                 _this.$swal("Error","Failed to authenticate user, you might need to login again", "error")
               })
           }
+        },
+        methods : {
+          logout: function () {
+            let _this= this;
+            localStorage.removeItem("jwt");
+            localStorage.removeItem("user");
+            _this.teamleader = false;
+            _this.organiser = false;
+            _this.normal = true;
+            this.$router.push('/');
+          }
         }
     }
 </script>
 
 <style scoped>
+
 </style>
 
 

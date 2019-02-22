@@ -10,6 +10,8 @@ import Register from '../components/Register'
 import TeamLeader from '../components/TeamLeader'
 import RaceOrganiser from '../components/RaceOrganiser'
 import NotFound from '../components/NotFound'
+import {isOrganiser} from "../worker";
+import Axios from "axios";
 
 Vue.use(Router)
 
@@ -85,16 +87,28 @@ router.beforeEach((to, from, next) => {
       })
     } else {
       let user = JSON.parse(localStorage.getItem('user'))
-      if(to.matched.some(record => record.meta.is_organiser)) {
-        if(user.is_organiser == 1){
-          next()
-        }
-        else{
-          next({ name: 'teamleader'})
-        }
-      }else {
-        next()
-      }
+      let is_organiser = 0;
+
+      Axios.post('http://localhost:3000/isorganiser', {
+        userID : user.userID
+      })
+        .then(response => {
+          is_organiser = response.data.response[0].organiser;
+          console.log(is_organiser);
+          if(to.matched.some(record => record.meta.is_organiser)) {
+            if(is_organiser === 1){
+              next()
+            }
+            else{
+              next({ name: 'teamleader'})
+            }
+          }else {
+            next()
+          }
+        })
+        .catch(error => {
+          return x;
+        })
     }
   } else if(to.matched.some(record => record.meta.guest)) {
     if(localStorage.getItem('jwt') == null){
