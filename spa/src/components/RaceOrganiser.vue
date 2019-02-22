@@ -27,7 +27,7 @@
             <b-button size="lg" variant="primary" block type="submit">Submit</b-button>
           </b-form>
         </b-col>
-        <b-col class="panel py-4" offset-md="1" md="5" style="background-color: rgb(32, 169, 215);">
+        <b-col class="panel py-4 racesList" offset-md="1" md="5" style="background-color: rgb(32, 169, 215);">
           <h2>Your races</h2>
           <table class="table">
               <thead>
@@ -40,19 +40,54 @@
               <tbody>
               <tr v-for="race in races">
                 <th>
-                  <a v-on:click="getRaceInfo(race, )">{{ race.raceName }}</a>
+                  <a class="raceName" v-on:click="getRaceInfo(race)">{{ race.raceName }}</a>
                 </th>
                 <th>{{ race.year }}</th>
-                <th v-if="race.processed == 0"><svg class="tick" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="Layer_1" style="enable-background:new 0 0 50 50;" version="1.1" viewBox="0 0 50 50" xml:space="preserve"><g id="tick-icon" style="&#10;"><polygon points="47.293,6.94 14,40.232 2.707,28.94 1.293,30.353 14,43.06 48.707,8.353  "/></g></svg></th>
+                <th v-if="race.processed == 1"><svg class="tick" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="Layer_1" style="enable-background:new 0 0 50 50;" version="1.1" viewBox="0 0 50 50" xml:space="preserve"><g id="tick-icon" style="&#10;"><polygon points="47.293,6.94 14,40.232 2.707,28.94 1.293,30.353 14,43.06 48.707,8.353  "/></g></svg></th>
+                <th v-if="race.processed == 0">x</th>
               </tr>
               </tbody>
             </table>
+            <p>Select a race to see its details</p>
         </b-col>
       </b-row>
-      <b-row class="col-lg-12 mx-auto mt-4" align-h="center">
-        <b-col class="panel py-4" md="5" style="background-color: rgb(101, 196, 137);">
-          <h2>Undefined</h2>
-
+      <b-row class="col-lg-12 mx-auto" align-h="center">
+        <b-col v-if="raceShow" md="11" class="panel raceView" style="background-color: rgb(101, 196, 137);">
+          <b-container class=" col-lg-12">
+            <b-row>
+              <b-col class="col-lg-5 pr-0">
+                <h2>{{ raceView.raceName }}    <b-button v-if="raceView.processed == 0" class="mb-2" size="sm" variant="primary" type="submit" v-bind:to="{ name: 'runrace'}">Run race</b-button></h2>
+                <p class="text-left mb-0">Select a division to see the entries:</p>
+                <p v-if="results.length == 0" class="text-left mb-0">There are no entries...</p>
+                <b-list-group class="mt-2">
+                  <b-list-group-item button class="d-flex justify-content-between align-items-center text-dark raceName" v-for="x in results" :key="x.name" v-on:click="seeDivision(x)">
+                    {{ x[0].raceDivision }}
+                    <b-badge variant="primary" pill>{{ x.length }}</b-badge>
+                  </b-list-group-item>
+                </b-list-group>
+              </b-col>
+              <b-col class="col-lg-6 pl-0 pr-2 divisionList" offset-md="1">
+                <div v-if="showDiv">
+                  <table class="table mt-5">
+                    <thead>
+                      <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Club</th>
+                        <th scope="col">Div</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="line in divRace">
+                      <td>{{ line.name }}</td>
+                      <td>{{ line.clubcode }}</td>
+                      <td>{{ line.division }}</td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </b-col>
+            </b-row>
+          </b-container>
         </b-col>
       </b-row>
     </b-container>
@@ -60,6 +95,8 @@
 </template>
 
 <script>
+    import {sortRaces} from "../worker";
+
     export default {
         name: "RaceOrganiser",
         data () {
@@ -72,7 +109,13 @@
             regionNames : [],
             regions: [],
             errors: [],
-            races : []
+            races : [],
+            raceView : [],
+            raceShow : false,
+            visible: false,
+            results : [],
+            divRace: [],
+            showDiv: false,
           }
         },
         created() {
@@ -133,6 +176,29 @@
                 _this.form.region = x.regionID;
               }
             })
+          },
+          getRaceInfo(race){
+            let _this= this;
+            _this.raceView = race;
+            _this.raceShow = true;
+            _this.showDiv = false;
+            _this.entryNumbers = [];
+            this.$http
+              .get('/raceresult_order?id=' + race.raceID)
+              .then(response => {
+                let results = sortRaces(response.data.response);
+                _this.results = results;
+                console.log(results);
+              })
+              .catch(e => {
+                this.errors.push(e)
+              })
+          },
+
+          seeDivision(div){
+            let _this= this;
+            _this.divRace = div;
+            _this.showDiv = true;
           }
         }
     }
@@ -161,4 +227,27 @@
     height: 20px;
   }
 
+  .raceView {
+  }
+
+  .raceView h2 {
+    text-align: left;
+  }
+
+  .raceName {
+    cursor: pointer;
+  }
+
+ @media only screen and (max-width: 767px) {
+   .racesList {
+     margin-top: 24px;
+   }
+ }
+
+ @media only screen and (max-width: 991px) {
+   .divisionList {
+     margin-top: 10px;
+     margin-left: 0px;
+   }
+ }
 </style>

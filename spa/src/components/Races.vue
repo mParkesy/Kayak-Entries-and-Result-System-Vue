@@ -119,7 +119,7 @@
     width: 1px;
   }
 
-  #races {
+/*  #races {
     background-color: rgb(228, 229, 231);
-  }
+  }*/
 </style>

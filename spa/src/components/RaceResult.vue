@@ -21,14 +21,14 @@
           </thead>
             <tbody>
               <tr v-for="line in result">
-                <th>{{ line.position }}</th>
-                <th>{{ line.name }}</th>
-                <th>{{ line.clubcode }}</th>
-                <th>{{ line.class }}</th>
-                <th>{{ line.division }}</th>
-                <th>{{ line.time }}</th>
-                <th>{{ line.points }}</th>
-                <th>{{ line.pd }}</th>
+                <td>{{ line.position }}</td>
+                <td>{{ line.name }}</td>
+                <td>{{ line.clubcode }}</td>
+                <td>{{ line.class }}</td>
+                <td>{{ line.division }}</td>
+                <td>{{ line.time }}</td>
+                <td>{{ line.points }}</td>
+                <td>{{ line.pd }}</td>
               </tr>
             </tbody>
         </table>
@@ -38,8 +38,9 @@
 </template>
 
 <script>
+  import { sortRaces } from "../worker";
 
-    export default {
+  export default {
       name: "RaceResult",
       data () {
         return {
@@ -55,21 +56,7 @@
           .then(response => {
             this.info = response.data.response;
             console.log(this.info);
-            let divRace = [];
-            let rd = "";
-            for(let i = 0; i < this.info.length; i++){
-              //console.log("Loop: " + i);
-              if(this.info[i].raceDivision === rd){
-                //.log("before and after same");
-                divRace.push(this.info[i]);
-              } else {
-                //console.log("different");
-                divRace = [];
-                divRace.push(this.info[i]);
-                this.race.push(divRace);
-              }
-              rd = this.info[i].raceDivision;
-            }
+            this.race = sortRaces(this.info);
           })
           .catch(e => {
             this.errors.push(e)
