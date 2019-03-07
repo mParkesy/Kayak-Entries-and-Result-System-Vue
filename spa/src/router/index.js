@@ -93,10 +93,10 @@ router.beforeEach((to, from, next) => {
         userID : user.userID
       })
         .then(response => {
-          is_organiser = response.data.response[0].organiser;
+          is_organiser = response.data.response[0].account;
           console.log(is_organiser);
           if(to.matched.some(record => record.meta.is_organiser)) {
-            if(is_organiser === 1){
+            if(is_organiser > 0){
               next()
             }
             else{

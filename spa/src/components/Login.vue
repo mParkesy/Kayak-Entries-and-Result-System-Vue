@@ -58,10 +58,12 @@
                 }
                 else {
                   if(is_organiser === 1){
-                    this.$router.push('raceorganiser');
+                    window.location = "/raceorganiser";
+                    //this.$router.push('raceorganiser');
                   }
                   else {
-                    this.$router.push('teamleader');
+                    window.location = "/teamleader";
+                    //this.$router.push('teamleader');
                   }
                 }
               }
