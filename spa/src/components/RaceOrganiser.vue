@@ -148,7 +148,7 @@
         methods : {
           handleSubmit(e){
             let _this= this;
-            _this.getRegionID(_this.form.region)
+            _this.getRegionID(_this.form.region);
             let userID = JSON.parse(localStorage.getItem('user')).clubID;
             let year = _this.form.date.substring(0, 4);
             let newDate = _this.form.date.substring(8, 10) + "/" + _this.form.date.substring(5, 7) + "/" + _this.form.date.substring(0, 4);

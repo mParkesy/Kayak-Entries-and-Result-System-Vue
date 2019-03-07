@@ -68,12 +68,17 @@
           call += "?year=" + year;
           this.selectRegionName = "All";
         }
+        call += "&process=1"
         this.$http
           .get(call)
           .then(response => {
             this.loading = true;
             this.info = response.data.response;
-
+            console.log(this.info);
+            if(this.info.length == 0){
+              this.selectYear--;
+              this.getRaces(this.selectYear, this.selectRegion, this.selectRegionName);
+            }
           })
           .catch(e => {
             this.errors.push(e)
