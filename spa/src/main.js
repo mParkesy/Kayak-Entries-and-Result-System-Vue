@@ -14,8 +14,6 @@ import './assets/css/style.css';
 import VueSweetAlert from 'vue-sweetalert'
 Vue.use(VueSweetAlert);
 
-
-
 Vue.component("RaceResult", {
 
 })

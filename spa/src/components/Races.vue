@@ -68,7 +68,7 @@
           call += "?year=" + year;
           this.selectRegionName = "All";
         }
-        call += "&process=1"
+        call += "&process=2"
         this.$http
           .get(call)
           .then(response => {

@@ -6,7 +6,7 @@ function sortRaces(list){
   let result = [];
   for(let i = 0; i < list.length; i++){
     //console.log("Loop: " + i);
-    if(list[i].raceDivision === rd){
+    if(list[i].divisionRaced === rd){
       //.log("before and after same");
       divRace.push(list[i]);
     } else {
@@ -15,7 +15,7 @@ function sortRaces(list){
       divRace.push(list[i]);
       result.push(divRace);
     }
-    rd = list[i].raceDivision;
+    rd = list[i].divisionRaced;
   }
   return result;
 }
