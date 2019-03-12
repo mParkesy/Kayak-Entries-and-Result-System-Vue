@@ -61,7 +61,7 @@
                 <p v-if="results.length == 0" class="text-left mb-0">There are no entries...</p>
                 <b-list-group class="mt-2">
                   <b-list-group-item button class="d-flex justify-content-between align-items-center text-dark raceName" v-for="x in results" :key="x.name" v-on:click="seeDivision(x)">
-                    {{ x[0].raceDivision }}
+                    {{ x[0].divisionRaced }}
                     <b-badge variant="primary" pill>{{ x.length }}</b-badge>
                   </b-list-group-item>
                 </b-list-group>
@@ -160,7 +160,7 @@
               year: year
             })
               .then(response => {
-                _this.$swal("Success", "The race has been added and should be accessible in your control panel.", "success")
+                    _this.$swal("Success", "The race has been added and should be accessible in your control panel.", "success")
                   .then(() => {
                     this.$router.go();
                   })
