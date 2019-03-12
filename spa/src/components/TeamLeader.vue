@@ -1,36 +1,139 @@
 <template>
   <div id="teamleader" class=" mt-4">
-    <b-container class="text-center mx-auto">
+    <loading :active.sync="isLoading"
+             :can-cancel="false"
+             :is-full-page="fullPage"
+             :opacity="0.5">
+    </loading>
+    <b-container class="text-center">
       <b-row class="col-lg-12 mx-auto mt-4">
-        <h2 style="text-align: left; font-size: 28px; font-weight: 600;">Current Entries that are open</h2>
+        <h2 class="title">Current Entries that are open</h2>
       </b-row>
       <b-row class="col-lg-12 mx-auto mt-4">
-        <table class="table table-bordered">
-          <thead class="thead-dark">
-            <tr>
-              <th scope="col">Race Name</th>
-              <th scope="col">Race Entry Closes</th>
+          <table class="table table-bordered">
+            <thead class="thead-dark">
+              <tr>
+                <th scope="col">Race Name</th>
+                <th scope="col">Race Entry Closes</th>
+                <th scope="col">Make Entries</th>
+                <th scope="col">See Club Entries</th>
+              </tr>
+            </thead>
+            <tbody>
+            <tr v-for="race in races">
+              <th>
+                <router-link :to="{}">
+                  <a class="raceName" v-on:click="raceSelected(race.raceID, race.raceName)">{{ race.raceName }}</a>
+                </router-link>
+              </th>
+              <th>
+                  {{ race.entryCloses.getDate() + "th " + months[race.entryCloses.getMonth()] + " at 10pm" }}
+              </th>
+              <th>
+                <router-link :to="{}">
+                  <a v-on:click="raceSelected(race.raceID, race.raceName)"><i class="fas fa-sign-in-alt plus"></i></a>
+                </router-link>
+              </th>
+              <th>
+                <router-link :to="{}">
+                  <a v-on:click=""><i class="fas fa-external-link-square-alt plus"></i></a>
+                </router-link>
+              </th>
             </tr>
-          </thead>
-          <tbody>
-          <tr v-for="race in races">
-            <th>
-              <router-link :to="{}">
-                <a class="raceName" v-on:click="raceSelected(race.raceID)">{{ race.raceName }}</a>
-              </router-link>
-            </th>
-            <th>
-                {{ race.entryCloses.getDate() + "th " + months[race.entryCloses.getMonth()] + " at 10pm" }}
-            </th>
-          </tr>
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+      </b-row>
+      <b-row class="col-lg-12 mx-auto mt-4">
+        <b-col class="p-0" md="7">
+          <h2 v-if="showEntries" class="title">Make entries for {{ raceName }}</h2>
+          <table v-if="showEntries" class="table table-bordered">
+            <thead class="thead-dark">
+            <tr>
+              <th scope="col">Paddler</th>
+              <th scope="col">Division</th>
+              <th scope="col">Class</th>
+              <th scope="col">Number of Entries</th>
+              <th scope="col">Enter</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="paddler in paddlers">
+              <td>
+                {{ paddler.name }}
+              </td>
+              <td>
+                {{ paddler.division }}
+              </td>
+              <td>
+                {{ paddler.class }}
+              </td>
+              <td>
+                {{ paddler.numEntries }}
+              </td>
+              <td>
+                <router-link :to="{}">
+                  <a v-on:click="paddlerEntered(paddler)"><i class="fas fa-plus-circle plus"></i></a>
+                </router-link>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </b-col>
+        <b-col class="mb-4" offset-md="1" md="4">
+          <h2 v-if="showEntries" class="title">Entries so far</h2>
+          <p v-if="(enteredPaddlers.length == 0 && submittedEntries.length == 0) && showEntries" class="text-left mb-0">There are no entries...</p>
+          <table v-if="enteredPaddlers.length > 0 || submittedEntries.length > 0" class="table table-bordered">
+            <thead class="thead-dark">
+            <tr>
+              <th scope="col">Paddler</th>
+              <th scope="col">Division</th>
+              <th scope="col">Remove</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr v-for="paddler in submittedEntries">
+              <td>
+                {{ paddler.name }}
+              </td>
+              <td>
+                {{ paddler.division }}
+              </td>
+              <td>
+
+                <router-link :to="{}">
+                  <a v-on:click="paddlerRemoved(paddler)"><i class="fas fa-minus-circle minus"></i></a>
+                </router-link>
+              </td>
+            </tr>
+            <tr v-for="paddler in enteredPaddlers">
+              <td>
+                {{ paddler.name }}
+              </td>
+              <td>
+                {{ paddler.division }}
+              </td>
+              <td>
+
+                <router-link :to="{}">
+                  <a v-on:click="paddlerRemoved(paddler)"><i class="fas fa-minus-circle minus"></i></a>
+                </router-link>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+          <b-button v-if="enteredPaddlers.length > 0 && showEntries" class="ml-0" size="sm" variant="primary" v-on:click="submitEntries">Submit Entries</b-button>
+        </b-col>
       </b-row>
     </b-container>
   </div>
 </template>
 
 <script>
+    // Import component
+    import Loading from 'vue-loading-overlay';
+    // Import stylesheet
+    import 'vue-loading-overlay/dist/vue-loading.css';
+
     export default {
       name: "TeamLeader",
       data () {
@@ -39,9 +142,18 @@
           errors: [],
           months: ["January", "February", "March", "April", "May", "June", "July", "August", "September",
             "October", "November", "December"],
-          showRace: false,
-
+          showEntries: false,
+          paddlers : [],
+          isLoading : false,
+          fullPage : true,
+          raceName : "",
+          raceID : 0,
+          submittedEntries : [],
+          enteredPaddlers : []
         }
+      },
+      components: {
+        Loading
       },
       created() {
         let _this = this;
@@ -70,20 +182,139 @@
             }
         })
         .catch(e => {
-          _this.errors.push(e)
+          console.log(e);
         })
       },
       methods : {
-        raceSelected(id) {
+        raceSelected(id, raceName) {
           let _this = this;
+          _this.raceName = raceName;
+          _this.raceID = id;
+          _this.enteredPaddlers = [];
+          let user = JSON.parse(localStorage.getItem('user'));
+          _this.isLoading = true;
+          _this.$http
+            .get("/clubpaddlers?club=" + user.clubID)
+            .then(response => {
+              let paddlers = response.data.response;
+              _this.paddlers = paddlers;
+              _this.$http
+                .get("/clubraceentries?raceid=" + id + "&clubid=" +user.clubID)
+                .then(response => {
+                  let already  = response.data.response;
+                  for(let i = 0; i < already.length; i++){
+                    _this.submittedEntries.push(already[i]);
+                  }
+                })
+                .catch(e => {
+                  console.log(e);
+                })
+              _this.isLoading = false;
+              _this.showEntries = true;
+            })
+            .catch(e => {
+              console.log(e);
+            })
 
-          _this.showRace = true;
-          console.log(id);
+        },
+        paddlerEntered(paddler){
+          let _this = this;
+          let duplicate = false;
+          for(let i = 0; i < _this.enteredPaddlers.length; i++){
+            if(_this.su[i].paddlerID == paddler.paddlerID){
+              _this.$swal("Duplicate Entry", "This paddler has already been entered.", "error");
+              duplicate = true;
+            }
+          }
+          for(let i = 0; i < _this.enteredPaddlers.length; i++){
+            if(_this.enteredPaddlers[i].paddlerID == paddler.paddlerID){
+              _this.$swal("Duplicate Entry", "This paddler has already been entered.", "error");
+              duplicate = true;
+            }
+          }
+          if(!duplicate){
+            _this.enteredPaddlers.push(paddler);
+          }
+          /*if(_this.enteredPaddlers.includes(paddler)){
+            _this.$swal("Duplicate Entry", "This paddler has already been entered.", "error");
+          } else {
+            _this.enteredPaddlers.push(paddler);
+          }*/
+        },
+        paddlerRemoved(paddler){
+          let _this = this;
+          let d;
+          if(_this.enteredPaddlers.includes(paddler)){
+            for(let i = 0; i < _this.enteredPaddlers.length; i++){
+              if(_this.enteredPaddlers[i].paddlerID = paddler.paddlerID){
+                d = i;
+              }
+            }
+            this.enteredPaddlers.splice(d, 1);
+          } else if (_this.submittedEntries.includes(paddler)){
+            for(let i = 0; i < _this.submittedEntries.length; i++){
+              if(_this.submittedEntries[i].paddlerID = paddler.paddlerID){
+                d = i;
+              }
+            }
+            this.submittedEntries.splice(d, 1);
+          }
+        },
+        submitEntries(){
+          let _this = this;
+          for(let i = 0; i < _this.enteredPaddlers.length; i++){
+            _this.$http
+              .get('/insertboat?div=' + _this.enteredPaddlers[i].division)
+              .then(response => {
+                let boatID = response.data.response.insertId;
+                _this.$http
+                  .post('/insertpaddlerboat', {
+                    boatid : boatID,
+                    paddlerid : _this.enteredPaddlers[i].paddlerID
+                  })
+                  .then(response2 => {
+                    console.log(response2.data.response);
+                    _this.$http
+                      .post('/insertraceresult', {
+                        boat : boatID,
+                        race : _this.raceID,
+                        div : _this.enteredPaddlers[i].division
+                      })
+                      .then(response3 => {
+                        console.log(response3.data.response);
+                      })
+                      .catch(e => {
+                        console.log(e);
+                      })
+                  })
+                  .catch(e => {
+                    console.log(e);
+                  })
+              })
+              .catch(e => {
+                console.log(e);
+              })
+          }
         }
       }
     }
 </script>
 
 <style scoped>
+  .title {
+    text-align: left;
+    font-size: 28px;
+    font-weight: 600;
+  }
+
+  .plus {
+    color: lightgreen;
+    font-size: 28px;
+  }
+
+  .minus {
+    color: red;
+    font-size: 28px;
+  }
 
 </style>
