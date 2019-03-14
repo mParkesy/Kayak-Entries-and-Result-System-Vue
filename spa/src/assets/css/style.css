@@ -172,7 +172,7 @@ img::-moz-selection {
   height: calc(100vh - 56px) !important;
 }
 
-header {
+.topheader {
   height: calc(100vh - 56px);
 }
 

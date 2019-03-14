@@ -5,9 +5,12 @@
              :is-full-page="fullPage"
              :opacity="0.5">
     </loading>
+    <b-modal id="modal1" title="BootstrapVue">
+      <p class="">Hello from modal!</p>
+    </b-modal>
     <b-container class="text-center">
       <b-row class="col-lg-12 mx-auto mt-4">
-        <h2 class="title">Current Entries that are open</h2>
+        <h2 class="title">Current Entries that are open</h2><b-button v-b-modal.modal1>Launch demo modal</b-button>
       </b-row>
       <b-row class="col-lg-12 mx-auto mt-4">
           <table class="table table-bordered">
@@ -16,7 +19,6 @@
                 <th scope="col">Race Name</th>
                 <th scope="col">Race Entry Closes</th>
                 <th scope="col">Make Entries</th>
-                <th scope="col">See Club Entries</th>
               </tr>
             </thead>
             <tbody>
@@ -32,11 +34,6 @@
               <th>
                 <router-link :to="{}">
                   <a v-on:click="raceSelected(race.raceID, race.raceName)"><i class="fas fa-sign-in-alt plus"></i></a>
-                </router-link>
-              </th>
-              <th>
-                <router-link :to="{}">
-                  <a v-on:click=""><i class="fas fa-external-link-square-alt plus"></i></a>
                 </router-link>
               </th>
             </tr>
@@ -57,7 +54,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr v-for="paddler in paddlers">
+            <tr v-for="(paddler, index) in paddlers">
               <td>
                 {{ paddler.name }}
               </td>
@@ -72,7 +69,7 @@
               </td>
               <td>
                 <router-link :to="{}">
-                  <a v-on:click="paddlerEntered(paddler)"><i class="fas fa-plus-circle plus"></i></a>
+                  <a v-on:click="paddlerEntered(index)"><i class="fas fa-plus-circle plus"></i></a>
                 </router-link>
               </td>
             </tr>
@@ -91,7 +88,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr v-for="paddler in submittedEntries">
+            <tr v-for="(paddler, index) in submittedEntries">
               <td>
                 {{ paddler.name }}
               </td>
@@ -99,13 +96,10 @@
                 {{ paddler.division }}
               </td>
               <td>
-
-                <router-link :to="{}">
-                  <a v-on:click="paddlerRemoved(paddler)"><i class="fas fa-minus-circle minus"></i></a>
-                </router-link>
+                <a v-on:click="paddlerRemoved(index, 0)"><i class="fas fa-minus-circle minus"></i></a>
               </td>
             </tr>
-            <tr v-for="paddler in enteredPaddlers">
+            <tr v-for="(paddler, index) in enteredPaddlers">
               <td>
                 {{ paddler.name }}
               </td>
@@ -113,10 +107,7 @@
                 {{ paddler.division }}
               </td>
               <td>
-
-                <router-link :to="{}">
-                  <a v-on:click="paddlerRemoved(paddler)"><i class="fas fa-minus-circle minus"></i></a>
-                </router-link>
+                <a v-on:click="paddlerRemoved(index, 1)"><i class="fas fa-minus-circle minus"></i></a>
               </td>
             </tr>
             </tbody>
@@ -182,6 +173,7 @@
             }
         })
         .catch(e => {
+          _this.$swal("There was an error", "There was an error loading the races for entry, please try again.", "error");
           console.log(e);
         })
       },
@@ -191,6 +183,7 @@
           _this.raceName = raceName;
           _this.raceID = id;
           _this.enteredPaddlers = [];
+          _this.submittedEntries = [];
           let user = JSON.parse(localStorage.getItem('user'));
           _this.isLoading = true;
           _this.$http
@@ -199,7 +192,7 @@
               let paddlers = response.data.response;
               _this.paddlers = paddlers;
               _this.$http
-                .get("/clubraceentries?raceid=" + id + "&clubid=" +user.clubID)
+                .get("/clubraceentries?raceid=" + id + "&clubid=" + user.clubID)
                 .then(response => {
                   let already  = response.data.response;
                   for(let i = 0; i < already.length; i++){
@@ -213,27 +206,28 @@
               _this.showEntries = true;
             })
             .catch(e => {
+              _this.$swal("There was an error", "There was an error loading the club paddlers, please try again.", "error");
               console.log(e);
             })
 
         },
-        paddlerEntered(paddler){
+        paddlerEntered(index){
           let _this = this;
           let duplicate = false;
-          for(let i = 0; i < _this.enteredPaddlers.length; i++){
-            if(_this.su[i].paddlerID == paddler.paddlerID){
+          for(let i = 0; i < _this.submittedEntries.length; i++){
+            if(_this.submittedEntries[i].paddlerID == _this.paddlers[index].paddlerID){
               _this.$swal("Duplicate Entry", "This paddler has already been entered.", "error");
               duplicate = true;
             }
           }
           for(let i = 0; i < _this.enteredPaddlers.length; i++){
-            if(_this.enteredPaddlers[i].paddlerID == paddler.paddlerID){
+            if(_this.enteredPaddlers[i].paddlerID == _this.paddlers[index].paddlerID){
               _this.$swal("Duplicate Entry", "This paddler has already been entered.", "error");
               duplicate = true;
             }
           }
           if(!duplicate){
-            _this.enteredPaddlers.push(paddler);
+            _this.enteredPaddlers.push(_this.paddlers[index]);
           }
           /*if(_this.enteredPaddlers.includes(paddler)){
             _this.$swal("Duplicate Entry", "This paddler has already been entered.", "error");
@@ -241,24 +235,60 @@
             _this.enteredPaddlers.push(paddler);
           }*/
         },
-        paddlerRemoved(paddler){
+        paddlerRemoved(index, option){
           let _this = this;
-          let d;
-          if(_this.enteredPaddlers.includes(paddler)){
-            for(let i = 0; i < _this.enteredPaddlers.length; i++){
+          if(option == 0){
+            // submittedEntries
+            let boatID = _this.submittedEntries[index].boatID;
+            _this.$http
+              .post('/deleteentry', {
+                boatid : boatID
+              })
+              .then(response => {
+                _this.submittedEntries.splice(index, 1);
+              })
+              .catch(e => {
+                console.log(e);
+                _this.$swal("Failed to delete entry", "If the error persists please contact an administrator", "error");
+              })
+
+          } else if (option == 1){
+            _this.enteredPaddlers.splice(index, 1);
+          }
+
+       /*   let d;
+          let boatID;
+          if(_this.enteredPaddlers.includes(_this.paddlers[index])){
+            /!*for(let i = 0; i < _this.enteredPaddlers.length; i++){
               if(_this.enteredPaddlers[i].paddlerID = paddler.paddlerID){
                 d = i;
+                console.log("deleting " + paddler.name);
+                console.log("position " + d);
+              }
+            }*!/
+            this.enteredPaddlers.splice(index, 1);
+          } else if (_this.submittedEntries.includes(_this.paddlers[index])){
+            for(let x = 0; x < _this.submittedEntries.length; x++){
+              //console.log(_this.submittedEntries);
+              if(_this.submittedEntries[x].paddlerID = paddler.paddlerID){
+                d = x;
+                //console.log("deleting " + paddler.name);
+                //console.log("position " + d);
+                boatID = _this.submittedEntries[x].boatID;
               }
             }
-            this.enteredPaddlers.splice(d, 1);
-          } else if (_this.submittedEntries.includes(paddler)){
-            for(let i = 0; i < _this.submittedEntries.length; i++){
-              if(_this.submittedEntries[i].paddlerID = paddler.paddlerID){
-                d = i;
-              }
-            }
-            this.submittedEntries.splice(d, 1);
-          }
+            _this.submittedEntries.splice(d, 1);
+            _this.$http
+              .post('/deleteentry', {
+                boatid : boatID
+              })
+              .then(response => {
+                console.log(response.data.response);
+              })
+              .catch(e => {
+                console.log(e);
+              })
+          }*/
         },
         submitEntries(){
           let _this = this;
@@ -281,7 +311,10 @@
                         div : _this.enteredPaddlers[i].division
                       })
                       .then(response3 => {
-                        console.log(response3.data.response);
+                        _this.$swal("Entries Submitted", "Your entries have been submitted", "success")
+                          .then(() => {
+                            this.$router.go();
+                          })
                       })
                       .catch(e => {
                         console.log(e);

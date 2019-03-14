@@ -1,5 +1,5 @@
 <template>
-  <header>
+  <div class="topheader">
     <div class="masthead text-center text-white d-flex">
       <div class="container my-auto">
         <div class="row">
@@ -15,7 +15,7 @@
         </div>
       </div>
     </div>
-  </header>
+  </div>
 </template>
 
 <script>

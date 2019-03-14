@@ -59,7 +59,7 @@
                 <h2>{{ raceView.raceName }}    <b-button v-if="raceView.processed == 0" class="mb-2" size="sm" variant="primary" type="submit" v-bind:to="{ name: 'runrace'}">Run race</b-button></h2>
                 <p class="text-left mb-0">Select a division to see the entries:</p>
                 <p v-if="results.length == 0" class="text-left mb-0">There are no entries...</p>
-                <b-list-group class="mt-2">
+                <b-list-group class="my-2">
                   <b-list-group-item button class="d-flex justify-content-between align-items-center text-dark raceName" v-for="x in results" :key="x.name" v-on:click="seeDivision(x)">
                     {{ x[0].divisionRaced }}
                     <b-badge variant="primary" pill>{{ x.length }}</b-badge>
@@ -161,9 +161,9 @@
             })
               .then(response => {
                     _this.$swal("Success", "The race has been added and should be accessible in your control panel.", "success")
-                  .then(() => {
-                    this.$router.go();
-                  })
+                      .then(() => {
+                        this.$router.go();
+                      })
               })
               .catch(error => {
                 _this.$swal("Race add Failed", error.response.data, "error");
