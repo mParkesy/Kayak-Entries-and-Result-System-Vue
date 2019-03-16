@@ -10,6 +10,7 @@ import Register from '../components/Register'
 import TeamLeader from '../components/TeamLeader'
 import RaceOrganiser from '../components/RaceOrganiser'
 import NotFound from '../components/NotFound'
+import RunRace from '../components/RunRace'
 import {isOrganiser} from "../worker";
 import Axios from "axios";
 
@@ -73,18 +74,23 @@ let router = new Router({
       path: '/*',
       name: 'redirect',
       redirect: '/404'
+    },
+    {
+      path: '/runrace/:id',
+      name: 'runrace',
+      component: RunRace,
+      meta: {
+        requiresAuth: true,
+        is_organiser: true
+      }
     }
-
   ]
 })
 
 router.beforeEach((to, from, next) => {
   if(to.matched.some(record => record.meta.requiresAuth)) {
     if (localStorage.getItem('jwt') == null) {
-      next({
-        path: '/login',
-        params: { nextUrl: to.fullPath }
-      })
+      this.$router.push('/login');
     } else {
       let user = JSON.parse(localStorage.getItem('user'))
       let is_organiser = 0;
@@ -96,25 +102,21 @@ router.beforeEach((to, from, next) => {
           is_organiser = response.data.response[0].account;
           console.log(is_organiser);
           if(to.matched.some(record => record.meta.is_organiser)) {
-            if(is_organiser > 0){
+            if(is_organiser == 1 || is_organiser == 2){
               next()
             }
             else{
-              next({ name: 'teamleader'})
+              this.$router.push('/teamleader');
             }
           }else {
             next()
           }
         })
         .catch(error => {
-          return x;
+          console.log(error);
         })
     }
-  } else if(to.matched.some(record => record.meta.guest)) {
-    if(localStorage.getItem('jwt') == null){
-      next()
-    }
-  }else {
+  } else {
     next()
   }
 })

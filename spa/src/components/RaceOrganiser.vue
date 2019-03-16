@@ -43,7 +43,7 @@
                   <a class="raceName" v-on:click="getRaceInfo(race)">{{ race.raceName }}</a>
                 </th>
                 <th>{{ race.year }}</th>
-                <th v-if="race.processed == 1"><svg class="tick" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="Layer_1" style="enable-background:new 0 0 50 50;" version="1.1" viewBox="0 0 50 50" xml:space="preserve"><g id="tick-icon" style="&#10;"><polygon points="47.293,6.94 14,40.232 2.707,28.94 1.293,30.353 14,43.06 48.707,8.353  "/></g></svg></th>
+                <th v-if="race.processed == 2"><svg class="tick" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="Layer_1" style="enable-background:new 0 0 50 50;" version="1.1" viewBox="0 0 50 50" xml:space="preserve"><g id="tick-icon" style="&#10;"><polygon points="47.293,6.94 14,40.232 2.707,28.94 1.293,30.353 14,43.06 48.707,8.353  "/></g></svg></th>
                 <th v-if="race.processed == 0">x</th>
               </tr>
               </tbody>
@@ -56,7 +56,7 @@
           <b-container class=" col-lg-12">
             <b-row>
               <b-col class="col-lg-5 pr-0">
-                <h2>{{ raceView.raceName }}    <b-button v-if="raceView.processed == 0" class="mb-2" size="sm" variant="primary" type="submit" v-bind:to="{ name: 'runrace'}">Run race</b-button></h2>
+                <h2>{{ raceView.raceName }}    <b-button v-if="raceView.processed == 0" class="mb-2" size="sm" variant="primary" type="submit" v-bind:to="{ name: 'runrace', params: { id: raceView.raceID }}">Run race</b-button></h2>
                 <p class="text-left mb-0">Select a division to see the entries:</p>
                 <p v-if="results.length == 0" class="text-left mb-0">There are no entries...</p>
                 <b-list-group class="my-2">

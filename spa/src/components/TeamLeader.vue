@@ -5,12 +5,9 @@
              :is-full-page="fullPage"
              :opacity="0.5">
     </loading>
-    <b-modal id="modal1" title="BootstrapVue">
-      <p class="">Hello from modal!</p>
-    </b-modal>
     <b-container class="text-center">
       <b-row class="col-lg-12 mx-auto mt-4">
-        <h2 class="title">Current Entries that are open</h2><b-button v-b-modal.modal1>Launch demo modal</b-button>
+        <h2 class="title">Current Entries that are open</h2>
       </b-row>
       <b-row class="col-lg-12 mx-auto mt-4">
           <table class="table table-bordered">
@@ -43,38 +40,36 @@
       <b-row class="col-lg-12 mx-auto mt-4">
         <b-col class="p-0" md="7">
           <h2 v-if="showEntries" class="title">Make entries for {{ raceName }}</h2>
-          <table v-if="showEntries" class="table table-bordered">
-            <thead class="thead-dark">
-            <tr>
-              <th scope="col">Paddler</th>
-              <th scope="col">Division</th>
-              <th scope="col">Class</th>
-              <th scope="col">Number of Entries</th>
-              <th scope="col">Enter</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="(paddler, index) in paddlers">
-              <td>
-                {{ paddler.name }}
-              </td>
-              <td>
-                {{ paddler.division }}
-              </td>
-              <td>
-                {{ paddler.class }}
-              </td>
-              <td>
-                {{ paddler.numEntries }}
-              </td>
-              <td>
-                <router-link :to="{}">
-                  <a v-on:click="paddlerEntered(index)"><i class="fas fa-plus-circle plus"></i></a>
-                </router-link>
-              </td>
-            </tr>
-            </tbody>
-          </table>
+          <div>
+            <table v-if="showEntries" class="table table-bordered">
+              <thead class="thead-dark">
+              <tr>
+                <th scope="col">Paddler</th>
+                <th scope="col">Division</th>
+                <th scope="col">Number of Entries</th>
+                <th scope="col">Make an entry</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr v-for="(paddler, index) in paddlers">
+                <td>
+                  {{ paddler.name }}
+                </td>
+                <td>
+                  {{ paddler.division }}
+                </td>
+                <td>
+                  {{ paddler.numEntries }}
+                </td>
+                <td>
+                  <router-link :to="{}">
+                    <a v-on:click="paddlerEntered(index)"><i class="fas fa-plus-circle plus"></i></a>
+                  </router-link>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
         </b-col>
         <b-col class="mb-4" offset-md="1" md="4">
           <h2 v-if="showEntries" class="title">Entries so far</h2>
@@ -140,7 +135,7 @@
           raceName : "",
           raceID : 0,
           submittedEntries : [],
-          enteredPaddlers : []
+          enteredPaddlers : [],
         }
       },
       components: {
@@ -255,40 +250,6 @@
           } else if (option == 1){
             _this.enteredPaddlers.splice(index, 1);
           }
-
-       /*   let d;
-          let boatID;
-          if(_this.enteredPaddlers.includes(_this.paddlers[index])){
-            /!*for(let i = 0; i < _this.enteredPaddlers.length; i++){
-              if(_this.enteredPaddlers[i].paddlerID = paddler.paddlerID){
-                d = i;
-                console.log("deleting " + paddler.name);
-                console.log("position " + d);
-              }
-            }*!/
-            this.enteredPaddlers.splice(index, 1);
-          } else if (_this.submittedEntries.includes(_this.paddlers[index])){
-            for(let x = 0; x < _this.submittedEntries.length; x++){
-              //console.log(_this.submittedEntries);
-              if(_this.submittedEntries[x].paddlerID = paddler.paddlerID){
-                d = x;
-                //console.log("deleting " + paddler.name);
-                //console.log("position " + d);
-                boatID = _this.submittedEntries[x].boatID;
-              }
-            }
-            _this.submittedEntries.splice(d, 1);
-            _this.$http
-              .post('/deleteentry', {
-                boatid : boatID
-              })
-              .then(response => {
-                console.log(response.data.response);
-              })
-              .catch(e => {
-                console.log(e);
-              })
-          }*/
         },
         submitEntries(){
           let _this = this;
