@@ -35,6 +35,12 @@
         password : ""
       }
     },
+    created() {
+      let _this = this;
+      if(_this.$route.query.result == 1){
+        _this.$swal("Account Verified","" , "success");
+      }
+    },
     methods : {
       handleSubmit(e){
         let _this= this;
@@ -43,29 +49,35 @@
            this.$http.post('/login', {
             email: this.email,
             password: this.password
-          })
+            })
             .then(response => {
-              let is_organiser = response.data.user.account;
-              let user = response.data.user;
-              delete user["account"];
-              localStorage.setItem('user',JSON.stringify(response.data.user));
-              localStorage.setItem('jwt',response.data.token);
+              let data = response.data;
+              let active = data.user.active;
+              if(active == 1){
+                let is_organiser = data.user.account;
+                let user = data.user;
+                delete user["account"];
+                localStorage.setItem('user',JSON.stringify(response.data.user));
+                localStorage.setItem('jwt',response.data.token);
 
-              if (localStorage.getItem('jwt') != null){
-                this.$emit('loggedIn');
-                if(this.$route.params.nextUrl != null){
-                  this.$router.push(this.$route.params.nextUrl);
-                }
-                else {
-                  if(is_organiser === 1){
-                    window.location = "/raceorganiser";
-                    //this.$router.push('raceorganiser');
+                if (localStorage.getItem('jwt') != null){
+                  this.$emit('loggedIn');
+                  if(this.$route.params.nextUrl != null){
+                    this.$router.push(this.$route.params.nextUrl);
                   }
                   else {
-                    window.location = "/teamleader";
-                    //this.$router.push('teamleader');
+                    if(is_organiser === 1){
+                      window.location = "/raceorganiser";
+                      //this.$router.push('raceorganiser');
+                    }
+                    else {
+                      window.location = "/teamleader";
+                      //this.$router.push('teamleader');
+                    }
                   }
                 }
+              } else {
+                _this.$swal("Login Failed", "Your account may not be verified", "error");
               }
             })
              .catch(error => {
