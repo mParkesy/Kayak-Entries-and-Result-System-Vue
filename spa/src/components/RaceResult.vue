@@ -5,8 +5,8 @@
         <h1> {{ this.racename }}</h1>
       </b-row>
       <b-row v-for="result in race" :key="result.raceID" class="col-lg-12">
-        <h2 style="text-align: left; font-size: 28px; font-weight: 600;"> Div {{ result[0].divisionRaced }} </h2>
-        <table class="table col-lg-12 mx-auto mt-2" v-bind:class="result[0].divisionRaced.includes('_') ? ' k2Table ' : {} ">
+        <h2 style="text-align: left; font-size: 28px; font-weight: 600;"> Div {{ result[0].raceDivision }} </h2>
+        <table class="table col-lg-12 mx-auto mt-2 results" v-bind:class="result[0].raceDivision.includes('_') ? ' k2Table ' : {} ">
           <thead class="thead-dark">
             <tr>
               <th scope="col">Position</th>
@@ -70,7 +70,6 @@
             .catch(e => {
               this.errors.push(e)
             })
-
       }
     }
 </script>

@@ -17,6 +17,7 @@ import Axios from "axios";
 Vue.use(Router)
 
 let router = new Router({
+  mode: 'history',
   routes: [
     {
       path: '/',
@@ -66,6 +67,15 @@ let router = new Router({
       }
     },
     {
+      path: '/runrace/:id',
+      name: 'runrace',
+      component: RunRace,
+      meta: {
+        requiresAuth: true,
+        is_organiser: true
+      }
+    },
+    {
       path: '/404',
       name: '404',
       component: NotFound
@@ -74,15 +84,6 @@ let router = new Router({
       path: '/*',
       name: 'redirect',
       redirect: '/404'
-    },
-    {
-      path: '/runrace/:id',
-      name: 'runrace',
-      component: RunRace,
-      meta: {
-        requiresAuth: true,
-        is_organiser: true
-      }
     }
   ]
 })

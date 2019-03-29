@@ -21,9 +21,6 @@
                 class="form-control"
                 required />
             </b-form-group>
-            <b-form-group id="region" label-for="regionSelect" label="Region: ">
-                <b-form-select :options="regionNames" v-model="form.region" required/>
-            </b-form-group>
             <b-button size="lg" variant="primary" block type="submit">Submit</b-button>
           </b-form>
         </b-col>
@@ -56,21 +53,28 @@
           <b-container class=" col-lg-12">
             <b-row>
               <b-col class="col-lg-5 pr-0">
-                <h2>{{ raceView.raceName }}    <b-button v-if="raceView.processed == 0" class="mb-2" size="sm" variant="primary" type="submit" v-bind:to="{ name: 'runrace', params: { id: raceView.raceID }}">Run race</b-button></h2>
+                <h2>{{ raceView.raceName }}</h2>
+                <h2>
+                  <b-button v-if="raceView.processed == 0" v-on:click="assignNumbers" class="mb-2" size="sm" variant="primary" type="submit">Assign boat numbers</b-button>
+                  <router-link :to="{ name: 'runrace', params: { id: raceView.raceID }}">
+                    <b-button  v-on:click="assignNumbers" v-if="raceView.processed == 0" class="mb-2" size="sm" variant="primary" type="submit">Run race</b-button>
+                  </router-link>
+                </h2>
                 <p class="text-left mb-0">Select a division to see the entries:</p>
                 <p v-if="results.length == 0" class="text-left mb-0">There are no entries...</p>
                 <b-list-group class="my-2">
-                  <b-list-group-item button class="d-flex justify-content-between align-items-center text-dark raceName" v-for="x in results" :key="x.name" v-on:click="seeDivision(x)">
-                    {{ x[0].divisionRaced }}
+                  <b-list-group-item button class="d-flex justify-content-between align-items-center text-dark raceName" v-for="x in results" :key="x.name" v-on:click="seeDivision(x,  x[0].raceDivision)">
+                    {{ x[0].raceDivision }}
                     <b-badge variant="primary" pill>{{ x.length }}</b-badge>
                   </b-list-group-item>
                 </b-list-group>
               </b-col>
               <b-col class="col-lg-6 pl-0 pr-2 divisionList" offset-md="1">
                 <div v-if="showDiv">
-                  <table class="table mt-5">
+                  <table class="table mt-5" v-bind:class="selected.includes('_') ? ' k2Table ' : {} ">
                     <thead>
                       <tr>
+                        <th scope="col">Boat Number</th>
                         <th scope="col">Name</th>
                         <th scope="col">Club</th>
                         <th scope="col">Div</th>
@@ -78,6 +82,7 @@
                     </thead>
                     <tbody>
                     <tr v-for="line in divRace">
+                      <td>{{ line.boatname }}</td>
                       <td>{{ line.name }}</td>
                       <td>{{ line.clubcode }}</td>
                       <td>{{ line.division }}</td>
@@ -103,11 +108,8 @@
           return {
             form: {
               racename: "",
-              date: "",
-              region: null
+              date: ""
             },
-            regionNames : [],
-            regions: [],
             errors: [],
             races : [],
             raceView : [],
@@ -116,28 +118,14 @@
             results : [],
             divRace: [],
             showDiv: false,
+            selected: ""
           }
         },
         created() {
           let user = JSON.parse(localStorage.getItem('user'));
           let _this= this;
-          this.$http
-            .get('/regions')
-            .then(response => {
-              this.regions = response.data.response;
-              let nameList = [];
-              this.regions.forEach(function(x) {
-                if(x.regionName != "ALL") {
-                  nameList.push(x.regionName);
-                }
-              })
-              this.regionNames = nameList;
-            })
-            .catch(e => {
-              this.errors.push(e)
-            }),
             this.$http
-              .get('/getclubraces?id=' + user.userID)
+              .get('/getclubraces?id=' + user.clubID)
               .then(response => {
                 this.races = response.data.response;
               })
@@ -148,14 +136,12 @@
         methods : {
           handleSubmit(e){
             let _this= this;
-            _this.getRegionID(_this.form.region);
             let userID = JSON.parse(localStorage.getItem('user')).clubID;
             let year = _this.form.date.substring(0, 4);
             let newDate = _this.form.date.substring(8, 10) + "/" + _this.form.date.substring(5, 7) + "/" + _this.form.date.substring(0, 4);
             this.$http.post('/insertrace', {
               name  : _this.form.racename,
               date : newDate,
-              regionID : _this.form.region,
               clubID : userID,
               year: year
             })
@@ -169,14 +155,6 @@
                 _this.$swal("Race add Failed", error.response.data, "error");
               });
           },
-          getRegionID(name){
-            let _this= this;
-            this.regions.forEach(function(x) {
-              if(x.regionName === name) {
-                _this.form.region = x.regionID;
-              }
-            })
-          },
           getRaceInfo(race){
             let _this= this;
             _this.raceView = race;
@@ -184,27 +162,54 @@
             _this.showDiv = false;
             _this.entryNumbers = [];
             this.$http
-              .get('/raceresult_order?id=' + race.raceID)
+              .get('/raceresult_number?id=' + race.raceID)
               .then(response => {
                 let results = sortRaces(response.data.response);
-                _this.results = results;
                 console.log(results);
+                _this.results = results;
               })
               .catch(e => {
                 this.errors.push(e)
               })
           },
 
-          seeDivision(div){
+          seeDivision(race, selected){
             let _this= this;
-            _this.divRace = div;
+            _this.divRace = race;
+            _this.selected = selected;
             _this.showDiv = true;
+          },
+          assignNumbers(){
+            let _this = this;
+            let divList = [];
+            for(let i = 0; i < _this.results.length; i++){
+              divList.push(_this.results[i][0].raceDivision);
+            }
+            let data = {
+              raceID : _this.raceView.raceID,
+              divList : divList
+            }
+            _this.$http
+              .post('/assignboatnumbers', {
+                data : data
+            })
+              .then(response => {
+                _this.$swal("Success", "Boat numbers have been assigned.", "success")
+            })
+              .catch(error => {
+                _this.$swal("Failed to assign boat numbers", error.response.data, "error");
+                this.errors.push(e)
+              })
           }
         }
     }
 </script>
 
 <style scoped>
+  .k2Table tr:nth-child(4n + 3), .k2Table tr:nth-child(4n+4) {
+    background: rgb(72, 173, 111);
+  }
+
  #raceorganiser {
     background-color: rgb(228, 229, 231);
  }

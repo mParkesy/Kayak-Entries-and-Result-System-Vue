@@ -29,6 +29,7 @@
                 <select id="account" v-model="is_raceorganiser" required class="form-control">
                   <option value="0">Team Leader</option>
                   <option value="1">Race Organiser</option>
+                  <option value="2">Both</option>
                 </select>
               </div>
                 <b-button size="lg" variant="primary" block type="submit" @click="handleSubmit">Register</b-button>
@@ -84,7 +85,7 @@
           } else {
             this.password = "";
             this.confirm_password = "";
-            alert("passwords were not the same");
+            _this.$swal("Registration Failed", "Passwords were not the same", "error");
           }
         }
       }
