@@ -13,6 +13,7 @@ import NotFound from '../components/NotFound'
 import RunRace from '../components/RunRace'
 import {isOrganiser} from "../worker";
 import Axios from "axios";
+import Phone from "../components/Phone";
 
 Vue.use(Router)
 
@@ -76,6 +77,11 @@ let router = new Router({
       }
     },
     {
+      path: '/phoneresults/:id',
+      name: 'phoneresults',
+      component: Phone
+    },
+    {
       path: '/404',
       name: '404',
       component: NotFound
@@ -96,7 +102,7 @@ router.beforeEach((to, from, next) => {
       let user = JSON.parse(localStorage.getItem('user'))
       let is_organiser = 0;
 
-      Axios.post('http://localhost:3000/isorganiser', {
+      Axios.post('http://192.168.0.47:3000/isorganiser', {
         userID : user.userID
       })
         .then(response => {

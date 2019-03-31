@@ -23,7 +23,7 @@ function sortRaces(list){
 
 function isOrganiser(user){
   let x = 0;
-  Axios.post('http://localhost:3000/isorganiser', {
+  Axios.post('http://192.168.0.47:3000/isorganiser', {
     userID : user.userID
   })
     .then(response => {
@@ -68,7 +68,7 @@ function secondsToHMS(secs) {
 
 function includesBoatNumber(list, number){
   for(let i = 0; i < list.length; i++){
-    if(list[i] === number){
+    if(list[i].boatname === number){
      return true;
     }
   }

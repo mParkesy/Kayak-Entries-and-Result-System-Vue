@@ -123,7 +123,7 @@
             </tr>
             </tbody>
           </table>
-          <b-button v-if="enteredPaddlers.length > 0 && showEntries" class="ml-0" size="sm" variant="primary" v-on:click="submitEntries">Submit Entries</b-button>
+          <b-button v-if="enteredPaddlers.length > 0 && showEntries" class="ml-0 mb-4" size="sm" variant="primary" v-on:click="submitEntries">Submit Entries</b-button>
         </b-col>
       </b-row>
     </b-container>
@@ -167,6 +167,7 @@
       _this.$http
         .get(call)
         .then(response => {
+          console.log(response);
           let races = response.data.response;
           for(let x = 0; x < races.length; x++){
             let parts = races[x].date.split("/");
@@ -304,7 +305,6 @@
               }
             }
           }
-
           _this.enteredPaddlers.splice(index, 1);
         }
       },
