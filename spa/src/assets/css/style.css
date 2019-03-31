@@ -34,6 +34,16 @@ h6 {
   font-family: 'Open Sans', 'Helvetica Neue', Arial, sans-serif;
 }
 
+.modal-backdrop
+{
+  opacity: 0.8 !important;
+}
+
+.panel {
+  border-radius: 10px;
+  color: white;
+}
+
 .bg-primary {
   background-color: #09377F;
 }
@@ -229,8 +239,14 @@ img::-moz-selection {
 
 .btn-primary:hover, .btn-primary:focus, .btn-primary:active, .btn-primary:visited {
   background-color: red !important;
+  border-color: red !important;
 }
 
+.btn:focus, .btn.focus {
+  outline: 0;
+  -webkit-box-shadow: 0 0 0 0rem rgba(0, 0, 0, 0) !important;
+  box-shadow: 0 0 0 0rem rgba(0, 0, 0, 0) !important;
+}
 
 .scrollDiv {
   height:700px;

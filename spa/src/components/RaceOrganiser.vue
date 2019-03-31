@@ -70,7 +70,7 @@
                 </b-list-group>
               </b-col>
               <b-col class="col-lg-6 pl-0 pr-2 divisionList" offset-md="1">
-                <div v-if="showDiv">
+                <div class="xScroll" v-if="showDiv">
                   <table class="table mt-5" v-bind:class="selected.includes('_') ? ' k2Table ' : {} ">
                     <thead>
                       <tr>
@@ -214,6 +214,10 @@
     background-color: rgb(228, 229, 231);
  }
 
+ th, td {
+   color: white;
+ }
+
   .panel {
     border-radius: 10px;
     color: white;
@@ -243,6 +247,10 @@
     cursor: pointer;
   }
 
+  .raceName:hover {
+    color: darkblue !important;
+  }
+
  @media only screen and (max-width: 767px) {
    .racesList {
      margin-top: 24px;
@@ -255,4 +263,10 @@
      margin-left: 0px;
    }
  }
+
+  @media only screen and (max-width: 420px) {
+    .xScroll {
+      overflow-x: scroll;
+    }
+  }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <div id="raceresult">
-    <b-container class="text-center mx-auto col-lg-10 mx-auto pt-4" style="overflow-x: scroll;">
+    <b-container class="text-center mx-auto col-lg-10 mx-auto pt-4 scrollX">
       <b-row class="col-lg-12">
         <h1> {{ this.racename }}</h1>
       </b-row>
@@ -81,5 +81,12 @@
 
   #raceresult {
     background-color: rgb(228, 229, 231);
+  }
+
+
+  @media only screen and (max-width: 730px) {
+    .scrollX {
+      overflow-x: scroll;
+    }
   }
 </style>

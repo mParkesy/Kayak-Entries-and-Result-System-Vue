@@ -34,7 +34,7 @@ import Axios from 'axios'
 
 
 const base = Axios.create({
-  baseURL: 'http://localhost:3000'
+  baseURL: 'http://192.168.0.47:3000'
 })
 
 Vue.prototype.$http = base;

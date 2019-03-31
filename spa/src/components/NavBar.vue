@@ -1,5 +1,5 @@
 <template>
-  <b-navbar toggleable="lg" type="light" variant="light" top>
+  <b-navbar class="level" toggleable="lg" type="light" variant="light" top>
     <b-navbar-brand v-bind:to="'/'">HBRM <img src="../assets/img/canoe.svg" alt="Canoe" style="width: 25px; height: 25px;"/></b-navbar-brand>
     <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
 
@@ -76,7 +76,9 @@
 </script>
 
 <style scoped>
-
+  .level {
+    z-index: 5;
+  }
 </style>
 
 
