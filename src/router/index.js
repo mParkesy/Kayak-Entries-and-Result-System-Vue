@@ -14,6 +14,7 @@ import RunRace from '../components/RunRace'
 import {isOrganiser} from "../worker";
 import Axios from "axios";
 import Phone from "../components/Phone";
+import RaceEntries from "../components/RaceEntries";
 
 Vue.use(Router)
 
@@ -74,6 +75,14 @@ let router = new Router({
       meta: {
         requiresAuth: true,
         is_organiser: true
+      }
+    },
+    {
+      path: '/raceentries/:id/:name',
+      name: 'raceentries',
+      component: RaceEntries,
+      meta: {
+        requiresAuth: true,
       }
     },
     {
