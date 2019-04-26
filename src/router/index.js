@@ -15,6 +15,7 @@ import {isOrganiser} from "../worker";
 import Axios from "axios";
 import Phone from "../components/Phone";
 import RaceEntries from "../components/RaceEntries";
+import AdminResult from "../components/AdminResult";
 
 Vue.use(Router)
 
@@ -86,6 +87,11 @@ let router = new Router({
       }
     },
     {
+      path: '/adminresult/:id',
+      name: 'adminresult',
+      component: AdminResult,
+    },
+    {
       path: '/phoneresults/:id',
       name: 'phoneresults',
       component: Phone
@@ -105,8 +111,8 @@ let router = new Router({
 
 router.beforeEach((to, from, next) => {
   if(to.matched.some(record => record.meta.requiresAuth)) {
-    if (localStorage.getItem('jwt') == null) {
-      this.$router.push('/login');
+    if (localStorage.getItem('jwt') === null) {
+      this.$router.push('/');
     } else {
       let user = JSON.parse(localStorage.getItem('user'))
       let is_organiser = 0;

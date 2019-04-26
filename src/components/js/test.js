@@ -31,20 +31,8 @@ export default {
   },
   created(){
     let _this = this;
+    _this.loadRace();
     _this.$http
-      .get('/race?id=' + this.$route.params.id)
-      .then(response => {
-        _this.race = response.data.response[0];
-        let divTimes = splitOffsets(_this.race.boatOffset);
-        for(let i = 0; i < divTimes.length; i++){
-          _this.form.divs.push(divTimes[i].time);
-        }
-      })
-      .catch(error => {
-        _this.$swal("Failed to get race data", "Please try again", "error");
-        console.log(error);
-      }),
-      _this.$http
         .get('/boatnumbers?id=' + this.$route.params.id)
         .then(response => {
           _this.raceBoatNumbers = response.data.response;
@@ -69,6 +57,22 @@ export default {
     _this.loadResult();
   },
   methods : {
+    loadRace(){
+      let _this = this;
+      _this.$http
+        .get('/race?id=' + this.$route.params.id)
+        .then(response => {
+          _this.race = response.data.response[0];
+          let divTimes = splitOffsets(_this.race.boatOffset);
+          for(let i = 0; i < divTimes.length; i++){
+            _this.form.divs.push(divTimes[i].time);
+          }
+        })
+        .catch(error => {
+          _this.$swal("Failed to get race data", "Please try again", "error");
+          console.log(error);
+        })
+    },
     loadDivisions(){
       let _this = this;
       _this.$http
@@ -132,6 +136,7 @@ export default {
         })
         .then(response => {
           _this.$swal("Stopwatch offsets submitted", "Division start times have been submitted, you can now input finish times", "success");
+          _this.loadRace();
         })
         .catch(error => {
           _this.$swal("Failed to submit stopwatch times", "Please try again", "error");
@@ -142,79 +147,88 @@ export default {
     },
     submitTime(boatnumber ,time){
       let _this = this;
-      let div = boatnumber[0];
-      let list = splitOffsets(_this.race.boatOffset);
-      let newTime = "";
-      // loop over offsets
-      for(let i = 0; i < list.length; i++){
-        // if div in offset list is div for boat number or its a k2 and outcome is finish then
-        if((list[i].div === div || (list[i].div.includes("_") && parseInt(boatnumber) > div + 50)) && (_this.selected === "Finish")){
-          // calculate new time from offset
-          newTime = secondsToHMS(hmsToSeconds(time) - hmsToSeconds(list[i].time));
-          // if outcome wasnt finish
-        } else if (_this.selected === "RTD") {
-          // set as retired
-          newTime = "RTD";
-        } else if (_this.selected === "DNS"){
-          newTime = "DNS";
-        }
-      }
-
-      let inList = false;
-      let submitList = false;
-      if(includesBoatNumber(_this.raceBoatNumbers, boatnumber)) {
-        inList = true;
-      } else if (includesBoatNumber(_this.submittedBoatNumbers, boatnumber)){
-        submitList = true;
-      } else {
+      if(boatnumber == ""){
         _this.message = {
           show : true,
           type : "danger",
-          text : boatnumber + " doesn't exist in the system"
+          text : "Boat number cannot be empty"
         };
-      }
-      if(inList || submitList){
-        _this.$http
-          .post('/updateboatresult', {
-            data : {
-              boatname : boatnumber,
-              racetime : newTime,
-              outcome : _this.selected
-            }
-          })
-          .then(response => {
-            if(inList){
-              _this.raceBoatNumbers.splice(_this.raceBoatNumbers.indexOf(boatnumber), 1);
-              let data = {
-                boatname : _this.boatnumber
-              };
-              _this.submittedBoatNumbers.push(data);
-              _this.message = {
-                show : true,
-                type : "success",
-                text : boatnumber + " submitted"
-              };
-            } else if (submitList){
-              _this.message = {
-                show : true,
-                type : "success",
-                text : boatnumber + " time has been overwritten"
-              };
-            }
+      } else {
 
-            _this.boatnumber = "";
-            _this.time = "";
-            _this.selected = "Finish";
-            _this.loadResult();
-          })
-          .catch(error => {
-            _this.message = {
-              show : true,
-              type : "danger",
-              text : boatnumber + " failed to submit"
-            };
-          })
+        let div = boatnumber[0];
+        let list = splitOffsets(_this.race.boatOffset);
+        let newTime = "";
+        // loop over offsets
+        for(let i = 0; i < list.length; i++){
+          // if div in offset list is div for boat number or its a k2 and outcome is finish then
+          if((list[i].div === div || (list[i].div.includes("_") && parseInt(boatnumber) > div + 50)) && (_this.selected === "Finish")){
+            // calculate new time from offset
+            newTime = secondsToHMS(hmsToSeconds(time) - hmsToSeconds(list[i].time));
+            // if outcome wasnt finish
+          } else if (_this.selected === "RTD") {
+            // set as retired
+            newTime = "RTD";
+          } else if (_this.selected === "DNS"){
+            newTime = "DNS";
+          }
+        }
+        let inList = false;
+        let submitList = false;
+        if(includesBoatNumber(_this.raceBoatNumbers, boatnumber)) {
+          inList = true;
+        } else if (includesBoatNumber(_this.submittedBoatNumbers, boatnumber)){
+          submitList = true;
+        } else {
+          _this.message = {
+            show : true,
+            type : "danger",
+            text : boatnumber + " doesn't exist in the system"
+          };
+        }
+        if(inList || submitList){
+          _this.$http
+            .post('/updateboattime', {
+              data : {
+                boatname : boatnumber,
+                racetime : newTime,
+                outcome : _this.selected
+              }
+            })
+            .then(response => {
+              if(inList){
+                _this.raceBoatNumbers.splice(_this.raceBoatNumbers.indexOf(boatnumber), 1);
+                let data = {
+                  boatname : _this.boatnumber
+                };
+                _this.submittedBoatNumbers.push(data);
+                _this.message = {
+                  show : true,
+                  type : "success",
+                  text : boatnumber + " submitted"
+                };
+              } else if (submitList){
+                _this.message = {
+                  show : true,
+                  type : "success",
+                  text : boatnumber + " time has been overwritten"
+                };
+              }
+
+              _this.boatnumber = "";
+              _this.time = "";
+              _this.selected = "Finish";
+              _this.loadResult();
+            })
+            .catch(error => {
+              _this.message = {
+                show : true,
+                type : "danger",
+                text : boatnumber + " failed to submit"
+              };
+            })
+        }
       }
+
     },
     submitPaddlerTime(){
       let _this = this;
@@ -253,7 +267,7 @@ export default {
       }
       if(inList || submitList){
         _this.$http
-          .post('/updateboatresult', {
+          .post('/updateboattime', {
             data : {
               boatname : _this.boatnumber,
               racetime : newTime,
@@ -293,8 +307,6 @@ export default {
             };
           })
       }*/
-
-
     },
     handleModal(evt){
       evt.preventDefault();
@@ -364,7 +376,39 @@ export default {
       }
     },
     submitAdvisor(){
+      let _this = this;
+      console.log(_this.race.regionID)
+      let data = {
+        process : 1,
+        raceID : _this.$route.params.id,
+        region : _this.race.regionID
+      }
+      _this.$http
+        .post('/updateraceprocess' , {
+          data : data
+        })
+        .then(response => {
+          _this.$swal("Success", "Race updates complete", "success")
+            .then(() => {
 
+            })
+        })
+    },
+    processResults(){
+      let _this = this;
+      let data = {
+        raceID : this.$route.params.id
+      }
+      _this.$http
+        .post('/processresults' , {
+          data : data
+        })
+        .then(response => {
+          console.log(response);
+        })
+        .catch(error => {
+          _this.$swal("Fail", "Failed to process results, please try again", "error");
+        })
     },
     validEmail(email){
       var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
