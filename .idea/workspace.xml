@@ -2,10 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2fd1fa28-2fe8-4965-9806-9441d030c276" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/components/RaceEntries.vue" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/AdminResult.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/TeamLeader.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/TeamLeader.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/RaceOrganiser.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/RaceOrganiser.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/RaceResult.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/RaceResult.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/RunRace.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/RunRace.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/js/test.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/js/test.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/router/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/router/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/worker.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/worker.js" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/.tmp/" />
     <ignored path="$PROJECT_DIR$/temp/" />
@@ -18,33 +22,50 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/components/TeamLeader.vue">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/components/RunRace.vue">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1190">
-              <caret line="56" column="28" selection-start-line="56" selection-start-column="28" selection-end-line="56" selection-end-column="28" />
+            <state relative-caret-position="1666">
+              <caret line="137" column="40" selection-start-line="137" selection-start-column="40" selection-end-line="137" selection-end-column="40" />
               <folding>
-                <element signature="n#style#0;n#b-row#1;n#b-container#0;n#div#0;n#template#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#b-col#0;n#b-row#2;n#b-container#0;n#div#0;n#template#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#b-col#0;n#b-row#3;n#b-container#0;n#div#0;n#template#0;n#!!top" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/components/RaceEntries.vue">
+        <entry file="file://$PROJECT_DIR$/src/worker.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="557">
-              <caret line="381" column="14" selection-start-line="381" selection-start-column="14" selection-end-line="383" selection-end-column="16" />
+            <state relative-caret-position="1258">
+              <caret line="74" column="1" lean-forward="true" selection-start-line="74" selection-start-column="1" selection-end-line="74" selection-end-column="1" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/components/Register.vue">
+        <entry file="file://$PROJECT_DIR$/src/components/js/test.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="425">
-              <caret line="61" column="10" selection-start-line="61" selection-start-column="10" selection-end-line="61" selection-end-column="28" />
+            <state relative-caret-position="47">
+              <caret line="398" selection-start-line="398" selection-end-line="410" selection-end-column="10" />
+              <folding>
+                <element signature="e#0#103#0" expanded="true" />
+                <element signature="e#7524#10080#0" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/components/AdminResult.vue">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="682">
+              <caret line="57" column="42" lean-forward="true" selection-start-line="57" selection-start-column="42" selection-end-line="57" selection-end-column="42" />
+              <folding>
+                <element signature="n#style#0;n#b-form-input#0;n#td#0;n#tr#0;n#tbody#0;n#table#0;n#b-row#0;n#b-form#0;n#b-container#0;n#div#0;n#template#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#b-form-input#0;n#td#5;n#tr#0;n#tbody#0;n#table#0;n#b-row#0;n#b-form#0;n#b-container#0;n#div#0;n#template#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#b-form-input#0;n#td#7;n#tr#0;n#tbody#0;n#table#0;n#b-row#0;n#b-form#0;n#b-container#0;n#div#0;n#template#0;n#!!top" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -63,18 +84,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>test</find>
-      <find>region</find>
-      <find>races</find>
-      <find>user</find>
-      <find>boatID</find>
-      <find>console</find>
-      <find>numEntries</find>
-      <find>paddlerEntered</find>
-      <find>overflow-x: scroll</find>
-      <find>allRaceResults</find>
-      <find>all</find>
-      <find>raceBoatNumbers</find>
       <find>.btn-primary:hover</find>
       <find>:focus</find>
       <find>_this.time</find>
@@ -93,16 +102,29 @@
       <find>offset</find>
       <find>K2</find>
       <find>paddler</find>
+      <find>NA</find>
+      <find>index</find>
+      <find>offsets</find>
+      <find>console</find>
+      <find>isOrganiser</find>
+      <find>isOrganiser(user)</find>
+      <find>updateboatresult</find>
+      <find>race</find>
+      <find>submitAdvisor</find>
+      <find>region</find>
+      <find>submit</find>
+      <find>doesn</find>
     </findStrings>
     <replaceStrings>
       <replace />
       <replace>localhost</replace>
       <replace>192.168.0.47</replace>
+      <replace>updateboattime</replace>
     </replaceStrings>
     <dirStrings>
-      <dir>C:\ThirdYearProjectVue</dir>
       <dir>C:\ThirdYearProjectVue\spa</dir>
       <dir>C:\ThirdYearProjectVue\spa\src</dir>
+      <dir>C:\ThirdYearProjectVue</dir>
     </dirStrings>
   </component>
   <component name="Git.Settings">
@@ -137,17 +159,23 @@
         <option value="$PROJECT_DIR$/spa/src/assets/css/style.css" />
         <option value="$PROJECT_DIR$/spa/package.json" />
         <option value="$PROJECT_DIR$/firebase.json" />
-        <option value="$PROJECT_DIR$/src/router/index.js" />
         <option value="$PROJECT_DIR$/src/components/RaceEntries.vue" />
         <option value="$PROJECT_DIR$/src/components/TeamLeader.vue" />
+        <option value="$PROJECT_DIR$/src/components/RaceOrganiser.vue" />
+        <option value="$PROJECT_DIR$/src/components/RaceResult.vue" />
+        <option value="$PROJECT_DIR$/src/worker.js" />
+        <option value="$PROJECT_DIR$/src/router/index.js" />
+        <option value="$PROJECT_DIR$/src/components/RunRace.vue" />
+        <option value="$PROJECT_DIR$/src/components/js/test.js" />
+        <option value="$PROJECT_DIR$/src/components/AdminResult.vue" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds">
-    <option name="x" value="1913" />
-    <option name="y" value="-69" />
-    <option name="width" value="958" />
-    <option name="height" value="1407" />
+  <component name="ProjectFrameBounds" extendedState="6">
+    <option name="x" value="200" />
+    <option name="y" value="-21" />
+    <option name="width" value="1294" />
+    <option name="height" value="1045" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -186,6 +214,13 @@
               <item name="ThirdYearProjectVue" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="components" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="ThirdYearProjectVue" type="b2602c69:ProjectViewProjectNode" />
+              <item name="ThirdYearProjectVue" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="components" type="462c0819:PsiDirectoryNode" />
+              <item name="js" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="ThirdYearProjectVue" type="b2602c69:ProjectViewProjectNode" />
@@ -307,11 +342,14 @@
       <workItem from="1554239271778" duration="1558000" />
       <workItem from="1555577116415" duration="12399000" />
       <workItem from="1555618249849" duration="5247000" />
+      <workItem from="1556040984889" duration="2357000" />
+      <workItem from="1556177820274" duration="24576000" />
+      <workItem from="1556267290277" duration="2196000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="301117000" />
+    <option name="totallyTimeSpent" value="330246000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -323,10 +361,10 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="1913" y="-69" width="958" height="1407" extended-state="0" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.23804347" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.115384616" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -338,7 +376,7 @@
       <window_info anchor="bottom" id="TODO" order="6" weight="0.32936078" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="8" weight="0.32936078" />
-      <window_info anchor="bottom" id="Terminal" order="9" sideWeight="0.4963119" visible="true" weight="0.19152276" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="9" sideWeight="0.4963119" visible="true" weight="0.26435536" />
       <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.5036881" side_tool="true" weight="0.24485373" />
       <window_info anchor="bottom" id="TypeScript" order="11" />
       <window_info anchor="bottom" id="Statistic" order="12" weight="0.32936078" />
@@ -416,32 +454,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="n#!!doc" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/worker.js">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/components/Races.vue">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="476">
           <caret line="28" column="16" lean-forward="true" selection-start-line="28" selection-start-column="16" selection-end-line="30" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/router/index.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="80" column="35" selection-start-line="80" selection-start-column="35" selection-end-line="80" selection-end-column="35" />
-          <folding>
-            <element signature="e#0#21#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -450,19 +466,13 @@
         <state relative-caret-position="-3446" />
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/components/RaceResult.vue">
+    <entry file="file://$PROJECT_DIR$/src/components/TeamLeader.vue">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="476">
-          <caret line="64" column="49" selection-start-line="64" selection-start-column="31" selection-end-line="64" selection-end-column="52" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/components/RaceOrganiser.vue">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-238">
-          <caret line="136" column="10" selection-start-line="136" selection-start-column="10" selection-end-line="136" selection-end-column="26" />
+        <state relative-caret-position="952">
+          <caret line="56" column="28" selection-start-line="56" selection-start-column="28" selection-end-line="56" selection-end-column="28" />
           <folding>
-            <element signature="n#style#0;n#b-col#0;n#b-row#0;n#b-container#0;n#div#0;n#template#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#b-row#1;n#b-container#0;n#div#0;n#template#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#b-col#0;n#b-row#2;n#b-container#0;n#div#0;n#template#0;n#!!top" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -476,18 +486,101 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/components/RaceEntries.vue">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="557">
-          <caret line="381" column="14" selection-start-line="381" selection-start-column="14" selection-end-line="383" selection-end-column="16" />
+        <state relative-caret-position="438">
+          <caret line="27" column="25" lean-forward="true" selection-start-line="27" selection-start-column="25" selection-end-line="27" selection-end-column="41" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/components/TeamLeader.vue">
+    <entry file="file://$PROJECT_DIR$/src/components/NavBar.vue">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1190">
-          <caret line="56" column="28" selection-start-line="56" selection-start-column="28" selection-end-line="56" selection-end-column="28" />
+        <state relative-caret-position="272">
+          <caret line="46" column="37" selection-start-line="46" selection-start-column="37" selection-end-line="46" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/router/index.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="376">
+          <caret line="119" column="42" selection-start-line="119" selection-start-column="42" selection-end-line="119" selection-end-column="42" />
           <folding>
-            <element signature="n#style#0;n#b-row#1;n#b-container#0;n#div#0;n#template#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#b-col#0;n#b-row#2;n#b-container#0;n#div#0;n#template#0;n#!!top" expanded="true" />
+            <element signature="e#0#21#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/components/Phone.vue">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="682">
+          <caret line="77" column="58" lean-forward="true" selection-start-line="77" selection-start-column="58" selection-end-line="77" selection-end-column="58" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="325">
+          <caret line="36" column="36" selection-start-line="36" selection-start-column="12" selection-end-line="36" selection-end-column="36" />
+          <folding>
+            <element signature="n#!!doc" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/components/RaceOrganiser.vue">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1921">
+          <caret line="149" column="10" selection-start-line="149" selection-start-column="10" selection-end-line="149" selection-end-column="62" />
+          <folding>
+            <element signature="n#style#0;n#b-col#0;n#b-row#0;n#b-container#0;n#div#0;n#template#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/components/RaceResult.vue">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="523">
+          <caret line="71" column="14" lean-forward="true" selection-start-line="63" selection-start-column="9" selection-end-line="71" selection-end-column="14" />
+          <folding>
+            <element signature="n#style#0;n#h2#0;n#b-row#1;n#b-container#0;n#div#0;n#template#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/worker.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1258">
+          <caret line="74" column="1" lean-forward="true" selection-start-line="74" selection-start-column="1" selection-end-line="74" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/components/RunRace.vue">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1666">
+          <caret line="137" column="40" selection-start-line="137" selection-start-column="40" selection-end-line="137" selection-end-column="40" />
+          <folding>
+            <element signature="n#style#0;n#b-col#0;n#b-row#3;n#b-container#0;n#div#0;n#template#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/components/js/test.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="47">
+          <caret line="398" selection-start-line="398" selection-end-line="410" selection-end-column="10" />
+          <folding>
+            <element signature="e#0#103#0" expanded="true" />
+            <element signature="e#7524#10080#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/components/AdminResult.vue">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="682">
+          <caret line="57" column="42" lean-forward="true" selection-start-line="57" selection-start-column="42" selection-end-line="57" selection-end-column="42" />
+          <folding>
+            <element signature="n#style#0;n#b-form-input#0;n#td#0;n#tr#0;n#tbody#0;n#table#0;n#b-row#0;n#b-form#0;n#b-container#0;n#div#0;n#template#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#b-form-input#0;n#td#5;n#tr#0;n#tbody#0;n#table#0;n#b-row#0;n#b-form#0;n#b-container#0;n#div#0;n#template#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#b-form-input#0;n#td#7;n#tr#0;n#tbody#0;n#table#0;n#b-row#0;n#b-form#0;n#b-container#0;n#div#0;n#template#0;n#!!top" expanded="true" />
           </folding>
         </state>
       </provider>

@@ -1,6 +1,26 @@
 <template>
   <div id="raceorganiser" class=" py-4">
     <b-container class="text-center mx-auto">
+      <b-modal id="editRace" ref="modal" title="Edit Race" @ok="handleUpdateOk">
+        <b-form class="form" @submit.stop.prevent="handleUpdateSubmit">
+          <b-form-group label="Race name: ">
+            <b-form-input
+              type="text"
+              v-model="raceView.raceName"
+              class="form-control"
+              placeholder="Race name"
+              required
+              autofocus />
+          </b-form-group>
+          <b-form-group label="Race date: ">
+            <b-form-input
+              type="date"
+              v-model="raceView.date"
+              class="form-control"
+              required />
+          </b-form-group>
+        </b-form>
+      </b-modal>
       <b-row class="col-lg-12 mx-auto mt-4" align-h="center">
         <b-col class="panel py-4" md="5" style="background-color: rgb(254, 193, 6);">
           <h2>Organise a new race</h2>
@@ -52,13 +72,14 @@
         <b-col v-if="raceShow" md="11" class="panel raceView" style="background-color: rgb(101, 196, 137);">
           <b-container class=" col-lg-12">
             <b-row>
-              <b-col class="col-lg-5 pr-0">
+              <b-col class="col-lg-8 pr-0">
                 <h2>{{ raceView.raceName }}</h2>
                 <h2>
                   <b-button v-if="raceView.processed == 0" v-on:click="assignNumbers" class="mb-2" size="sm" variant="primary" type="submit">Assign boat numbers</b-button>
                   <router-link :to="{ name: 'runrace', params: { id: raceView.raceID }}">
                     <b-button  v-on:click="assignNumbers" v-if="raceView.processed == 0" class="mb-2" size="sm" variant="primary" type="submit">Run race</b-button>
                   </router-link>
+                  <b-button class="mb-2" size="sm" variant="primary" type="submit" v-b-modal.editRace>Edit Race</b-button>
                 </h2>
                 <p class="text-left mb-0">Select a division to see the entries:</p>
                 <p v-if="results.length == 0" class="text-left mb-0">There are no entries...</p>
@@ -100,7 +121,7 @@
 </template>
 
 <script>
-    import {sortRaces} from "../worker";
+    import {sortRaces, htmlDateToUK, UKTohtmlDate} from "../worker";
 
     export default {
         name: "RaceOrganiser",
@@ -118,7 +139,11 @@
             results : [],
             divRace: [],
             showDiv: false,
-            selected: ""
+            selected: "",
+            editForm: {
+              racename: "",
+              year: ""
+            }
           }
         },
         created() {
@@ -135,10 +160,11 @@
         },
         methods : {
           handleSubmit(e){
+            e.preventDefault();
             let _this= this;
             let userID = JSON.parse(localStorage.getItem('user')).clubID;
             let year = _this.form.date.substring(0, 4);
-            let newDate = _this.form.date.substring(8, 10) + "/" + _this.form.date.substring(5, 7) + "/" + _this.form.date.substring(0, 4);
+            let newDate = htmlDateToUK(_this.form.date);
             this.$http.post('/insertrace', {
               name  : _this.form.racename,
               date : newDate,
@@ -146,18 +172,46 @@
               year: year
             })
               .then(response => {
-                    _this.$swal("Success", "The race has been added and should be accessible in your control panel.", "success")
-                      .then(() => {
-                        this.$router.go();
-                      })
+                _this.$swal("Success", "The race has been added and should be accessible in your control panel.", "success")
+                  .then(() => {
+                    this.$router.go();
+                  })
               })
               .catch(error => {
                 _this.$swal("Race add Failed", error.response.data, "error");
               });
           },
+          handleUpdateOk(e){
+            e.preventDefault();
+            this.handleUpdateSubmit();
+          },
+
+          handleUpdateSubmit(){
+            let _this= this;
+            let year = _this.raceView.date.substring(0, 4);
+            let date = htmlDateToUK(_this.raceView.date);
+            this.$http.post('/updaterace', {
+              name  : _this.raceView.raceName,
+              date : date,
+              year: year,
+              raceID : _this.raceView.raceID
+            })
+              .then(response => {
+                this.$nextTick(() => {
+                  this.$refs.modal.hide()
+                })
+                _this.$swal("Success", "The race has been updated.", "success")
+                  .then(() => {
+                  })
+              })
+              .catch(error => {
+                _this.$swal("Race update Failed", error.response.data, "error");
+              });
+          },
           getRaceInfo(race){
             let _this= this;
             _this.raceView = race;
+            _this.raceView.date = UKTohtmlDate(_this.raceView.date);
             _this.raceShow = true;
             _this.showDiv = false;
             _this.entryNumbers = [];
@@ -165,7 +219,6 @@
               .get('/raceresult_number?id=' + race.raceID)
               .then(response => {
                 let results = sortRaces(response.data.response);
-                console.log(results);
                 _this.results = results;
               })
               .catch(e => {

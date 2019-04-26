@@ -2,7 +2,7 @@
   <div id="raceresult">
     <b-container class="text-center mx-auto col-lg-10 mx-auto pt-4 scrollX">
       <b-row class="col-lg-12">
-        <h1> {{ this.racename }}</h1>
+        <h1> {{ racename }}</h1>
       </b-row>
       <b-row v-for="result in race" :key="result.raceID" class="col-lg-12">
         <h2 style="text-align: left; font-size: 28px; font-weight: 600;"> Div {{ result[0].raceDivision }} </h2>

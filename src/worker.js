@@ -5,12 +5,21 @@ function sortRaces(list){
   let rd = "";
   let result = [];
   for(let i = 0; i < list.length; i++){
-    //console.log("Loop: " + i);
+    if(list[i].time === "NA"){
+      list[i].position = "";
+      list[i].points = "";
+      list[i].pd = "";
+      list[i].time = list[i].outcome;
+    } else if (list[i].points === "NA"){
+      list[i].points = "";
+    }
+    if (list[i].pd === "NA"){
+      list[i].pd = "";
+    }
+
     if(list[i].raceDivision === rd){
-      //.log("before and after same");
       divRace.push(list[i]);
     } else {
-      //console.log("different");
       divRace = [];
       divRace.push(list[i]);
       result.push(divRace);
@@ -21,20 +30,19 @@ function sortRaces(list){
 }
 
 
-function isOrganiser(user){
+function isOrganiser(user, result){
   let x = 0;
-  Axios.post('http://192.168.0.47:3000/isorganiser', {
+
+  Axios.post('http://localhost:3000/isorganiser', {
     userID : user.userID
   })
     .then(response => {
-      console.log("hello")
-      x = response.data.response[0].organiser;
-      return x;
+      x = response.data.response[0].account;
     })
     .catch(error => {
-      return x;
+
     })
-  return x;
+  result(x);
 }
 
 function splitOffsets(list){
@@ -75,6 +83,14 @@ function includesBoatNumber(list, number){
   return false;
 }
 
+function htmlDateToUK(date){
+  return date.substring(8, 10) + "/" + date.substring(5, 7) + "/" + date.substring(0, 4);
+}
+
+function UKTohtmlDate(date){
+  return date.substring(6, 10) + "-" + date.substring(3, 5) + "-" + date.substring(0, 2);
+}
+
 /*function getTime(seconds){
   console.log(seconds / 60 / 60);
   console.log(seconds / 60);
@@ -92,4 +108,4 @@ function getSeconds(time){
   return hh + mm + parseInt(ss);
 }*/
 
-export {sortRaces, isOrganiser, splitOffsets, getSeconds, getTime, hmsToSeconds, secondsToHMS, includesBoatNumber}
+export {sortRaces, isOrganiser, splitOffsets, getSeconds, getTime, hmsToSeconds, secondsToHMS, includesBoatNumber, htmlDateToUK, UKTohtmlDate}

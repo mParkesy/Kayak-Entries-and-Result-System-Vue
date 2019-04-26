@@ -10,11 +10,12 @@
         <b-col class="panel py-2" md="12" style="background-color: white;">
           <b-button class="m-1" v-on:click="" type="submit" variant="primary">About</b-button>
           <b-button class="m-1" v-b-modal.textSubmission type="submit" variant="primary">Text Box Time Submission</b-button>
-          <b-button class="m-1" v-on:click="" type="submit" variant="primary">Process Results</b-button>
+          <b-button class="m-1" v-on:click="processResults" type="submit" variant="primary">Process Results</b-button>
           <b-button class="m-1" v-b-modal.invitephone v-on:click="" type="submit" variant="primary">Invite Finish Phone User</b-button>
           <b-button class="m-1" v-on:click="submitAdvisor" type="submit" variant="primary">Submit Results</b-button>
         </b-col>
       </b-row>
+
       <b-modal
         @ok="finishPhone"
         id="invitephone"
@@ -57,6 +58,7 @@
       <b-row class="col-lg-12 mx-auto mt-4">
         <b-col class="panel py-4" md="5" style="background-color: rgb(254, 193, 6);">
           <h3 class="pb-2">Enter stopwatch start times</h3>
+          <p v-if="divisions.length == 0">There are no entries in divisions.</p>
           <b-form @submit="handleStopwatch">
             <b-form-group v-for="(div, index) in divisions" :key="div.raceDivision"
               :id="div.raceDivision"
@@ -82,7 +84,7 @@
           <b-button v-on:click="submitPaddlerTime()" type="submit" variant="primary">Submit</b-button>
         </b-col>
       </b-row>
-      <b-row v-for="result in results" :key="result.raceID" class="col-lg-12 mx-auto mt-4">
+      <b-row v-for="result in results" :key="result.raceID" class="col-lg-14 mx-auto mt-4">
         <b-col class="panel py-4 race xScroll" md="12" style="background-color: rgb(101, 196, 137);">
           <h2 style="text-align: left; font-size: 28px; font-weight: 600;"> Div {{ result[0].raceDivision }} </h2>
           <table class="table col-lg-12 mx-auto mt-2 results" v-bind:class="result[0].raceDivision.includes('_') ? ' k2Table ' : {} ">
@@ -133,7 +135,7 @@
     }
   }
 
-  @media only screen and (max-width: 992px) {
+  @media only screen and (max-width: 800px) {
     .xScroll {
       overflow-x: scroll;
     }
