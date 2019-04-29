@@ -117,7 +117,7 @@ router.beforeEach((to, from, next) => {
       let user = JSON.parse(localStorage.getItem('user'))
       let is_organiser = 0;
 
-      Axios.post('http://192.168.0.47:3000/isorganiser', {
+      Axios.post('http://192.168.0.14:3000/isorganiser', {
         userID : user.userID
       })
         .then(response => {

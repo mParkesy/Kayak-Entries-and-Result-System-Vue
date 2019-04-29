@@ -247,7 +247,9 @@
                 data : data
             })
               .then(response => {
+                _this.getRaceInfo(_this.raceView);
                 _this.$swal("Success", "Boat numbers have been assigned.", "success")
+
             })
               .catch(error => {
                 _this.$swal("Failed to assign boat numbers", error.response.data, "error");

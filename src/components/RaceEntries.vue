@@ -11,7 +11,7 @@
                           placeholder="Search for a paddler from your club"></b-form-input>
 
             <b-list-group class="paddlerList" v-if="dropdown">
-              <b-list-group-item  class="paddler" v-for="(search_paddler, index) in clubSearch" :key="search_paddler.paddlerID" @click="paddlerEntered(index)">{{ search_paddler.name }}</b-list-group-item>
+              <b-list-group-item  class="paddler" v-for="(search_paddler, index) in clubSearch" :key="search_paddler.paddlerID" @click="paddlerEnteredSearch(search_paddler)">{{ search_paddler.name }}</b-list-group-item>
             </b-list-group>
           </div>
           <div>
@@ -177,6 +177,7 @@
             console.log("Count: " + i + ", ID: " + _this.enteredPaddlers[i].paddlerID + ", Compared to: " + _this.paddlers[index].paddlerID);
             if (_this.enteredPaddlers[i].paddlerID === _this.paddlers[index].paddlerID) {
               _this.$swal("Duplicate Entry", "This paddler has already been entered.", "error");
+              console.log("yesy");
               duplicate = true;
             }
           }
@@ -194,6 +195,23 @@
           } else {
             _this.enteredPaddlers.push(paddler);
           }*/
+        },
+        paddlerEnteredSearch(searchPaddler){
+          let _this = this;
+          _this.search = "";
+          _this.closeDropdown();
+          console.log("Searched paddler: " + searchPaddler.name);
+          for(let i = 0; i < _this.paddlers.length; i++){
+            if(_this.paddlers[i].paddlerID == searchPaddler.paddlerID){
+              console.log("found in list");
+              if(!_this.checkDuplicate(i)){
+                _this.enteredPaddlers.unshift(_this.paddlers[i]);
+              }
+            } else {
+
+            }
+          }
+
         },
         paddlerRemoved(index, option){
           let _this = this;
