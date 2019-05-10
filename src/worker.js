@@ -75,8 +75,10 @@ function secondsToHMS(secs) {
 }
 
 function includesBoatNumber(list, number){
+  console.log(list);
+  console.log(number)
   for(let i = 0; i < list.length; i++){
-    if(list[i].boatname === number){
+    if(list[i].boatname == number){
      return true;
     }
   }

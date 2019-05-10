@@ -32,12 +32,33 @@ Vue.component("Login", {
 
 import Axios from 'axios'
 
-
 const base = Axios.create({
   baseURL: 'http://192.168.0.47:3000'
 })
 
+base.interceptors.request.use(
+  reqConfig => {
+    reqConfig.headers.authorization = localStorage.getItem('jwt');
+
+    return reqConfig;
+  },
+  err => Promise.reject(err),
+);
+
 Vue.prototype.$http = base;
+
+
+
+/*base.interceptors.request.use(function (config) {
+  let token = localStorage.getItem('jwt');
+  if(token != null){
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+}, function (error) {
+  // Do something with request error
+  return Promise.reject(error);
+});*/
 
 /* eslint-disable no-new */
 new Vue({

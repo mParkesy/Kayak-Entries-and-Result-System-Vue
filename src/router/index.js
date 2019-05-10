@@ -16,6 +16,7 @@ import Axios from "axios";
 import Phone from "../components/Phone";
 import RaceEntries from "../components/RaceEntries";
 import AdminResult from "../components/AdminResult";
+import ClubEntries from "../components/ClubEntries";
 
 Vue.use(Router)
 
@@ -67,6 +68,14 @@ let router = new Router({
       meta: {
         requiresAuth: true,
         is_organiser: true
+      }
+    },
+    {
+      path: '/clubentries/:id/:club',
+      name: 'clubentries',
+      component: ClubEntries,
+      meta: {
+        requiresAuth: true,
       }
     },
     {
