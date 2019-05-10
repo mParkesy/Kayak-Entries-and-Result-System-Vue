@@ -8,7 +8,7 @@
       </b-row>
       <b-row class="col-lg-12 mx-auto mt-4">
         <b-col class="panel py-2" md="12" style="background-color: white;">
-          <b-button class="m-1" v-on:click="" type="submit" variant="primary">About</b-button>
+          <b-button class="m-1" v-b-modal.about type="submit" variant="primary">About</b-button>
           <b-button class="m-1" v-b-modal.textSubmission type="submit" variant="primary">Text Box Time Submission</b-button>
           <b-button class="m-1" v-b-modal.invitephone v-on:click="" type="submit" variant="primary">Invite Finish Phone User</b-button>
           <b-button class="m-1" v-on:click="processResults" type="submit" variant="primary">Process Results</b-button>
@@ -18,7 +18,17 @@
           <b-button class="m-1" v-on:click="submitAdvisor" type="submit" variant="primary">Submit Results</b-button>
         </b-col>
       </b-row>
-
+      <b-modal
+        id="about"
+        size="m"
+        centered
+        title="About this page"
+        ref="about"
+      >
+        <p>
+          How do u use this page
+        </p>
+      </b-modal>
       <b-modal
         @ok="finishPhone"
         id="invitephone"
@@ -28,8 +38,8 @@
         ref="textModal"
       >
         <p>
-          Type the email address of the person that you would like to have access to <br>
-          inputting boat number and times to help speed up processing results.<br>
+          Type the email address of the person that you would like to have access to
+          inputting boat number and times to help speed up processing results.
           They will need to click the link in the email to get access.
         </p>
         <b-form-input type="email" v-model="inviteEmail" placeholder="Email Address"></b-form-input>

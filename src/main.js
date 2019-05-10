@@ -33,7 +33,7 @@ Vue.component("Login", {
 import Axios from 'axios'
 
 const base = Axios.create({
-  baseURL: 'http://192.168.0.47:3000'
+  baseURL: 'http://192.168.0.14:3000'
 })
 
 base.interceptors.request.use(
