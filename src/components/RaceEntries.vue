@@ -6,10 +6,11 @@
           <h2 class="title">Make entries for {{ raceName }}</h2>
           <p id="mobileText" class="title">Mobile mode: only search can be used to make entries</p>
           <div class="mb-3">
-            <b-form-input v-model="search"
-                          type="search"
-                          placeholder="Search for a paddler from your club"></b-form-input>
-
+            <b-form-input
+              v-model="search"
+              type="search"
+              placeholder="Search for a paddler from your club">
+            </b-form-input>
             <b-list-group class="paddlerList" v-if="dropdown">
               <b-list-group-item  class="paddler" v-for="(search_paddler, index) in clubSearch" :key="search_paddler.paddlerID" @click="paddlerEntered(index)">{{ search_paddler.name }}</b-list-group-item>
             </b-list-group>
@@ -71,7 +72,7 @@
                               placeholder="Search for a paddler"></b-form-input>
 
                 <b-list-group class="paddlerList" v-if="dropdown">
-                  <b-list-group-item  class="paddler" v-for="search_paddler in paddlerResults" :key="search_paddler.paddlerID" @click="addToK2(search_paddler, index, 1)">{{ search_paddler.clubcode }} : {{ search_paddler.name }}</b-list-group-item>
+                  <b-list-group-item  class="paddler" v-for="search_paddler in paddlerSearchResults" :key="search_paddler.paddlerID" @click="addToK2(search_paddler, index, 1)">{{ search_paddler.clubcode }} : {{ search_paddler.name }}</b-list-group-item>
                 </b-list-group>
               </td>
               <td align="center" valign="middle">
@@ -118,10 +119,11 @@
           enteredPaddlers : [],
           session_boatID : 1,
           dropdown: false,
-          paddlerResults: [],
+          paddlerSearchResults: [],
           search : '',
           k2Mode: false,
           selectedK2index : 0,
+          allRacersEntered : []
         }
       },
       created(){
@@ -152,7 +154,15 @@
             _this.$swal("There was an error", "There was an error loading the club paddlers, please try again.", "error");
             console.log(e);
           })
-
+        _this.$http
+          .get('/getracepaddlers?id=' + _this.raceID)
+          .then(response => {
+            let result = response.data.response;
+            _this.allRacersEntered = result;
+          })
+          .catch(e => {
+            this.errors.push(e)
+          })
       },
       methods : {
         closeDropdown(){
@@ -167,6 +177,12 @@
         checkDuplicate(index) {
           let _this = this;
           let duplicate = false;
+          for (let i = 0; i < _this.allRacersEntered.length; i++) {
+            if (_this.allRacersEntered[i].paddlerID === _this.paddlers[index].paddlerID) {
+              _this.$swal("Duplicate Entry", "This paddler has already been entered.", "error");
+              duplicate = true;
+            }
+          }
           for (let i = 0; i < _this.submittedEntries.length; i++) {
             if (_this.submittedEntries[i].paddlerID === _this.paddlers[index].paddlerID) {
               _this.$swal("Duplicate Entry", "This paddler has already been entered.", "error");
@@ -278,6 +294,10 @@
                       })
                   })
                   .catch(e => {
+                    _this.$swal("K2 Entry error", "The page will now refresh, please check and see what entries were submitted and correct any errors.", "error")
+                      .then(() => {
+                        this.$router.go();
+                      })
                     console.log(e);
                   })
               }
@@ -302,10 +322,17 @@
 
                     })
                     .catch(e => {
-                      console.log(e);
+                      _this.$swal("Error", "The page will now refresh, please check and see what entries were submitted and correct any errors.", "error")
+                        .then(() => {
+                          this.$router.go();
+                        })
                     })
                 })
                 .catch(e => {
+                  _this.$swal("Error", "The page will now refresh, please check and see what entries were submitted and correct any errors.", "error")
+                    .then(() => {
+                      this.$router.go();
+                    })
                   console.log(e);
                 })
             }
@@ -344,23 +371,38 @@
           if(option == 0){
             // do submitted
           } else {
-            // do current
-            //console.log(_this.enteredPaddlers[index]);
-            if(_this.enteredPaddlers[index].k2 === "yes"){
-              _this.enteredPaddlers[index] = {
-                k2 : "yes",
-                boatID : _this.session_boatID,
-                class: paddler.class,
-                clubID: paddler.clubID,
-                division: paddler.division,
-                name: paddler.name,
-                numEntries: "0",
-                paddlerID: paddler.paddlerID
+            let duplicate = false;
+            for (let i = 0; i < _this.allRacersEntered.length; i++) {
+              if (_this.allRacersEntered[i].paddlerID == paddler.paddlerID) {
+                _this.$swal("Duplicate Entry", "This paddler has already been entered.", "error");
+                duplicate = true;
               }
-              _this.session_boatID++;
             }
-            //console.log(_this.enteredPaddlers);
-            _this.k2Mode = false;
+            if(!duplicate) {
+              // do current
+              //console.log(_this.enteredPaddlers[index]);
+              if (_this.enteredPaddlers[index].k2 === "yes") {
+                _this.enteredPaddlers[index] = {
+                  k2: "yes",
+                  boatID: _this.session_boatID,
+                  class: paddler.class,
+                  clubID: paddler.clubID,
+                  division: paddler.division,
+                  name: paddler.name,
+                  numEntries: "0",
+                  paddlerID: paddler.paddlerID
+                }
+                _this.session_boatID++;
+              }
+              //console.log(_this.enteredPaddlers);
+              _this.k2Mode = false;
+            }
+          }
+        },
+        getK2Partner(boatID){
+          let _this = this;
+          for(let i = 0; i < _this.allRacersEntered; i++){
+
           }
         }
       },
@@ -372,10 +414,10 @@
             _this.$http
               .get('search?term=' + _this.search)
               .then(response => {
-                _this.paddlerResults = response.data.response;
-                if(_this.paddlerResults.length === 0){
+                _this.paddlerSearchResults = response.data.response;
+                if(_this.paddlerSearchResults.length === 0){
                   _this.$swal("No search results", "", "error");
-                } else if (_this.paddlerResults.length === 1){
+                } else if (_this.paddlerSearchResults.length === 1){
                   //this.handlePaddler(this.paddlers[0]);
                 }
               })

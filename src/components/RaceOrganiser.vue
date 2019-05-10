@@ -1,6 +1,18 @@
 <template>
   <div id="raceorganiser" class=" py-4">
     <b-container class="text-center mx-auto">
+      <b-modal centered id="enterPaddler" ref="enterPaddler" title="Enter Paddler" @ok="">
+        <b-alert class="my-1 mx-3" :show="message.show" :variant="message.type">{{ message.text }}</b-alert>
+        <b-form class="form" @submit.stop.prevent="">
+          <b-form-input v-model="search"
+                        type="search"
+                        placeholder="Search for a paddler"></b-form-input>
+
+          <b-list-group class="paddlerList" v-if="dropdown">
+            <b-list-group-item class="paddler" v-for="search_paddler in paddlerSearchResults" :key="search_paddler.paddlerID" @click="addPaddler(search_paddler)">{{ search_paddler.clubcode }} : {{ search_paddler.name }}</b-list-group-item>
+          </b-list-group>
+        </b-form>
+      </b-modal>
       <b-modal id="editRace" ref="modal" title="Edit Race" @ok="handleUpdateOk">
         <b-form class="form" @submit.stop.prevent="handleUpdateSubmit">
           <b-form-group label="Race name: ">
@@ -44,7 +56,7 @@
             <b-button size="lg" variant="primary" block type="submit">Submit</b-button>
           </b-form>
         </b-col>
-        <b-col class="panel py-4 racesList" offset-md="1" md="5" style="background-color: rgb(32, 169, 215);">
+        <b-col class="panel py-4 racesList" offset-md="1" md="6" style="background-color: rgb(32, 169, 215);">
           <h2>Your races</h2>
           <table class="table">
               <thead>
@@ -52,6 +64,7 @@
                   <th scope="col">Race Name</th>
                   <th scope="col">Year</th>
                   <th scope="col">Complete</th>
+                  <th scope="col"></th>
                 </tr>
               </thead>
               <tbody>
@@ -62,6 +75,7 @@
                 <th>{{ race.year }}</th>
                 <th v-if="race.processed == 2"><svg class="tick" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="Layer_1" style="enable-background:new 0 0 50 50;" version="1.1" viewBox="0 0 50 50" xml:space="preserve"><g id="tick-icon" style="&#10;"><polygon points="47.293,6.94 14,40.232 2.707,28.94 1.293,30.353 14,43.06 48.707,8.353  "/></g></svg></th>
                 <th v-if="race.processed == 0">x</th>
+                <th><a class="raceName" v-on:click="getRaceInfo(race)"><div class="icon">Go</div></a></th>
               </tr>
               </tbody>
             </table>
@@ -69,13 +83,18 @@
         </b-col>
       </b-row>
       <b-row class="col-lg-12 mx-auto" align-h="center">
-        <b-col v-if="raceShow" md="11" class="panel raceView" style="background-color: rgb(101, 196, 137);">
-          <b-container class=" col-lg-12">
+        <b-col v-if="raceShow" md="12" class="panel raceView px-4 pb-3" style="background-color: rgb(101, 196, 137);">
             <b-row>
-              <b-col class="col-lg-8 pr-0">
+              <b-col class="col-md-5">
                 <h2>{{ raceView.raceName }}</h2>
                 <h2>
+                  <b-button v-if="raceView.processed == 0" class="mb-2" size="sm" variant="primary" type="submit" v-b-modal.enterPaddler>Enter paddler</b-button>
                   <b-button v-if="raceView.processed == 0" v-on:click="assignNumbers" class="mb-2" size="sm" variant="primary" type="submit">Assign boat numbers</b-button>
+                  <b-form-select v-model="selected" :options="clubList" @change="getClubEntries" class="mb-2 mt-1">
+                    <template slot="first">
+                      <option :value="null" disabled>Club Entries</option>
+                    </template>
+                  </b-form-select>
                   <router-link :to="{ name: 'runrace', params: { id: raceView.raceID }}">
                     <b-button  v-on:click="assignNumbers" v-if="raceView.processed == 0" class="mb-2" size="sm" variant="primary" type="submit">Run race</b-button>
                   </router-link>
@@ -90,13 +109,13 @@
                   </b-list-group-item>
                 </b-list-group>
               </b-col>
-              <b-col class="col-lg-6 pl-0 pr-2 divisionList" offset-md="1">
+              <b-col class="col-md-6 pr-2 divisionList ml-3" offset="1">
                 <div class="xScroll" v-if="showDiv">
                   <table class="table mt-5" v-bind:class="selected.includes('_') ? ' k2Table ' : {} ">
                     <thead>
                       <tr>
-                        <th scope="col">Boat Number</th>
-                        <th scope="col">Name</th>
+                        <th valign="middle" scope="col">Boat Number</th>
+                        <th valign="middle" scope="col">Name</th>
                         <th scope="col">Club</th>
                         <th scope="col">Div</th>
                       </tr>
@@ -113,7 +132,6 @@
                 </div>
               </b-col>
             </b-row>
-          </b-container>
         </b-col>
       </b-row>
     </b-container>
@@ -143,19 +161,28 @@
             editForm: {
               racename: "",
               year: ""
-            }
+            },
+            search : '',
+            dropdown: false,
+            paddlerSearchResults : [],
+            message : [],
+            allRacersEntered : [],
+            clubList : [],
+            selected : null,
+
           }
         },
         created() {
           let user = JSON.parse(localStorage.getItem('user'));
           let _this= this;
-            this.$http
+            _this.$http
               .get('/getclubraces?id=' + user.clubID)
               .then(response => {
-                this.races = response.data.response;
+                _this.races = response.data.response;
               })
               .catch(error => {
                 _this.$swal("You have no races", "", "error");
+                console.log(error)
               })
         },
         methods : {
@@ -169,7 +196,8 @@
               name  : _this.form.racename,
               date : newDate,
               clubID : userID,
-              year: year
+              year: year,
+              region : _this.raceView.regionID
             })
               .then(response => {
                 _this.$swal("Success", "The race has been added and should be accessible in your control panel.", "success")
@@ -185,7 +213,6 @@
             e.preventDefault();
             this.handleUpdateSubmit();
           },
-
           handleUpdateSubmit(){
             let _this= this;
             let year = _this.raceView.date.substring(0, 4);
@@ -194,7 +221,7 @@
               name  : _this.raceView.raceName,
               date : date,
               year: year,
-              raceID : _this.raceView.raceID
+              raceID : _this.raceView.raceID,
             })
               .then(response => {
                 this.$nextTick(() => {
@@ -220,12 +247,49 @@
               .then(response => {
                 let results = sortRaces(response.data.response);
                 _this.results = results;
+
               })
               .catch(e => {
                 this.errors.push(e)
               })
-          },
+            _this.$http
+              .get('/getracepaddlers?id=' + race.raceID)
+              .then(response => {
+                let result = response.data.response;
+                _this.allRacersEntered = result;
+                let clubs = [];
+                for(let i = 0; i < _this.allRacersEntered.length; i++) {
+                  let club = {
+                    value: _this.allRacersEntered[i].clubcode,
+                    text: _this.allRacersEntered[i].clubname,
+                  };
+                  clubs.push(club);
 
+                }
+                _this.clubList = [...new Set(clubs.map(x => x.value))];
+              })
+              .catch(e => {
+                this.errors.push(e)
+              })
+
+
+          },
+          getClubEntries(){
+            let _this = this;
+            _this.assignNumbers();
+            if(_this.selected != null){
+              _this.$http
+                .get('clubbycode?code=' + _this.selected)
+                .then(response => {
+                  let clubID = response.data[0].clubID;
+                  window.location = "/clubentries/" + _this.raceView.raceID + "/" + clubID;
+                })
+                .catch(error => {
+                  console.log(error)
+                  _this.errors.push(error)
+                })
+            }
+          },
           seeDivision(race, selected){
             let _this= this;
             _this.divRace = race;
@@ -248,13 +312,100 @@
             })
               .then(response => {
                 _this.$swal("Success", "Boat numbers have been assigned.", "success")
+                  .then(() => {
+                    this.$router.go();
+                  })
             })
               .catch(error => {
                 _this.$swal("Failed to assign boat numbers", error.response.data, "error");
-                this.errors.push(e)
+                _this.errors.push(e)
               })
+          },
+          closeDropdown(){
+            let _this = this;
+            _this.dropdown = false;
+          },
+          addPaddler(paddler){
+            let _this = this;
+            let duplicate = false;
+            for(let i = 0; i < _this.allRacersEntered.length; i ++){
+                let current = _this.allRacersEntered[i];
+                if(paddler.paddlerID == current.paddlerID){
+                  duplicate = true;
+                }
+            }
+            if(duplicate){
+              _this.message = {
+                show : true,
+                type : "danger",
+                text : "Duplicate Entry"
+              };
+            } else {
+              _this.$http
+                .post('/insertboatresult', {
+                  race : _this.raceView.raceID,
+                  div : paddler.division
+                })
+                .then(response => {
+                  let boatID = response.data.response.insertId;
+                  _this.$http
+                    .post('/insertpaddlerboat', {
+                      boatid : boatID,
+                      paddlerid : paddler.paddlerID
+                    })
+                    .then(response2 => {
+                      _this.message = {
+                        show : true,
+                        type : "success",
+                        text : "Paddler entered"
+                      };
+                      _this.dropdown = false;
+                      _this.search = "";
+                    })
+                    .catch(e => {
+                      _this.$swal("K2 Entry error", "The page will now refresh, please check and see what entries were submitted and correct any errors.", "error")
+                        .then(() => {
+                          this.$router.go();
+                        })
+                    })
+                })
+                .catch(e => {
+                  _this.$swal("K2 Entry error", "The page will now refresh, please check and see what entries were submitted and correct any errors.", "error")
+                    .then(() => {
+                      this.$router.go();
+                    })
+                  console.log(e);
+                })
+            }
+          }
+        },
+      watch: {
+        search: function() {
+          let _this = this;
+          if(_this.search.length >= 3){
+            _this.dropdown = true;
+            _this.$http
+              .get('search?term=' + _this.search)
+              .then(response => {
+                _this.paddlerSearchResults = response.data.response;
+                if(_this.paddlerSearchResults.length === 0){
+                  _this.message = {
+                    show : true,
+                    type : "danger",
+                    text : "No search results"
+                  };
+                } else if (_this.paddlerSearchResults.length === 1){
+                  //this.handlePaddler(this.paddlers[0]);
+                }
+              })
+              .catch(error => {
+                _this.$swal("Search error", error.response.data, "error");
+              })
+          } else {
+            _this.closeDropdown();
           }
         }
+      },
     }
 </script>
 
@@ -312,8 +463,9 @@
 
  @media only screen and (max-width: 991px) {
    .divisionList {
-     margin-top: 10px;
-     margin-left: 0px;
+     margin-top: 0px;
+     margin-left: 0px !important;
+     margin-right: 5px !important;
    }
  }
 
@@ -322,4 +474,21 @@
       overflow-x: scroll;
     }
   }
+
+  .icon{
+    line-height: 5px;
+    font-weight: 800;
+    text-align: center;
+    font-size: 14px;
+    color: white;
+    background: darkgreen;
+    width: 30px;
+    height: 30px;
+    margin: 0px;
+    border-radius: 50%;
+    padding: 12px 12px 12px 5px;
+    text-decoration: none !important;
+    cursor: pointer;
+  }
+
 </style>
