@@ -1,6 +1,6 @@
 <template>
   <div id="runrace" class=" py-4">
-    <b-container class="text-center mx-auto">
+    <b-container v-if="canView" class="text-center mx-auto">
       <b-row class="col-lg-12 mt-4">
         <b-col class="py-1" md="8">
           <h2 class="mb-0" style="text-align: left">Running race: {{ race.raceName }}</h2>
@@ -10,8 +10,11 @@
         <b-col class="panel py-2" md="12" style="background-color: white;">
           <b-button class="m-1" v-on:click="" type="submit" variant="primary">About</b-button>
           <b-button class="m-1" v-b-modal.textSubmission type="submit" variant="primary">Text Box Time Submission</b-button>
-          <b-button class="m-1" v-on:click="processResults" type="submit" variant="primary">Process Results</b-button>
           <b-button class="m-1" v-b-modal.invitephone v-on:click="" type="submit" variant="primary">Invite Finish Phone User</b-button>
+          <b-button class="m-1" v-on:click="processResults" type="submit" variant="primary">Process Results</b-button>
+          <router-link :to="{ name: 'adminresult', params: { id: race.raceID }}">
+            <b-button class="m-1" type="submit" variant="primary">See Results</b-button>
+          </router-link>
           <b-button class="m-1" v-on:click="submitAdvisor" type="submit" variant="primary">Submit Results</b-button>
         </b-col>
       </b-row>
@@ -85,7 +88,7 @@
         </b-col>
       </b-row>
       <b-row v-for="result in results" :key="result.raceID" class="col-lg-14 mx-auto mt-4">
-        <b-col class="panel py-4 race xScroll" md="12" style="background-color: rgb(101, 196, 137);">
+        <b-col class="panel py-3 race xScroll" md="12" style="background-color: rgb(101, 196, 137);">
           <h2 style="text-align: left; font-size: 28px; font-weight: 600;"> Div {{ result[0].raceDivision }} </h2>
           <table class="table col-lg-12 mx-auto mt-2 results" v-bind:class="result[0].raceDivision.includes('_') ? ' k2Table ' : {} ">
             <thead class="thead-dark">
