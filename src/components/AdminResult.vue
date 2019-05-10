@@ -7,11 +7,11 @@
       <b-form @submit="handleSubmit">
       <b-row v-for="(result, index) in race" :key="result.raceID" class="col-lg-12">
         <h2 style="text-align: left; font-size: 28px; font-weight: 600;"> Div {{ result[0].raceDivision }} </h2>
-          <table class="table col-lg-12 mx-auto mt-2 results" v-bind:class="result[0].raceDivision.includes('_') ? ' k2Table ' : {} ">
+          <table class="table col-lg-12 mt-2 results" v-bind:class="result[0].raceDivision.includes('_') ? ' k2Table ' : {} ">
             <thead class="thead-dark">
             <tr>
-              <th scope="col">Position</th>
-              <th scope="col">Name</th>
+              <th scope="col" >Position</th>
+              <th class="col-sm-1" scope="col">Name</th>
               <th scope="col">Club</th>
               <th scope="col">Class</th>
               <th scope="col">Div</th>
@@ -23,12 +23,13 @@
             <tbody>
             <tr v-if="isRegional" v-for="(line, x) in result">
               <td align="center">
-                <b-form-input
-                  v-model="editForm[x].position"
+                {{ line.position }}
+                <!--<b-form-input
+                  v-model="line.position"
                   type="text"
                   style="width: 50px"
                   size="3"
-                ></b-form-input>
+                ></b-form-input>-->
               </td>
               <td align="center">{{ line.name }}</td>
               <td align="center">{{ line.clubcode }}</td>
@@ -36,7 +37,7 @@
               <td align="center">{{ line.division }}</td>
               <td align="center">
                 <b-form-input
-                  v-model="editForm[x].time"
+                  v-model="line.time"
                   type="text"
                   style="width: 100px"
                 ></b-form-input>
@@ -44,7 +45,7 @@
               <td align="center">{{ line.points }}</td>
               <td align="center">
                 <b-form-input
-                  v-model="editForm[x].pd"
+                  v-model="line.pd"
                   type="text"
                   style="width: 50px"
                 ></b-form-input>
@@ -84,7 +85,8 @@
           editForm: [],
           isRegional : false,
           access : [],
-          isOrganiser : false
+          isOrganiser : false,
+          listPromotionDemotion : []
         }
       },
       created() {
@@ -140,9 +142,7 @@
           .get('/raceresult_order?id=' + _this.$route.params.id)
           .then(response => {
             _this.info = response.data.response;
-            for(let i = 0; i < _this.info.length; i++){
-              _this.editForm.push(_this.info[i]);
-            }
+
             _this.race = sortRaces(_this.info);
           })
           .catch(e => {
@@ -163,14 +163,19 @@
             let _this = this;
             e.preventDefault();
             let update = [];
-            for(let i = 0; i < _this.editForm.length; i++){
-              update.push({
-                raceID : _this.$route.params.id,
-                position : _this.editForm[i].position,
-                time : _this.editForm[i].time,
-                pd : _this.editForm[i].pd,
-                boatname : this.editForm[i].boatname
-              })
+            for(let i = 0; i < _this.race.length; i++){
+              for(let x = 0; x < _this.race[i].length; x++){
+                let current = _this.race[i][x];
+
+                update.push({
+                  raceID : _this.$route.params.id,
+                  position : current.position,
+                  time : current.time,
+                  pd : current.pd,
+                  boatname : current.boatname
+                })
+              }
+
             }
             _this.$http.post('/mass_updateboatresult', {
               data : update
@@ -186,7 +191,8 @@
                   })
                   .then(response => {
                     let data = {
-                      raceID : this.$route.params.id
+                      raceID : this.$route.params.id,
+                      processType : 1
                     }
                     _this.$http
                       .post('/processresults' , {
@@ -226,4 +232,6 @@
       overflow-x: scroll;
     }
   }
+
+
 </style>
