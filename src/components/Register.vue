@@ -3,7 +3,7 @@
     <div class="masthead text-center text-white d-flex ">
       <div class="container my-auto">
         <div class="row">
-          <div class="col-lg-4 mx-auto text-center">
+          <div class="col-md-8 mx-auto text-center">
             <h1 class="text-uppercase">
               <strong>Register</strong>
             </h1>
@@ -16,7 +16,7 @@
                 <input type="password" v-model="password" id="password" class="form-control" placeholder="Password" required>
               </div>
               <div class="form-group">
-                <input type="text" v-model="confirm_password" id="confirmPassword" class="form-control" placeholder="Confirm Password" required>
+                <input type="password" v-model="confirm_password" id="confirmPassword" class="form-control" placeholder="Confirm Password" required>
               </div>
               <div class="form-group">
                 <input type="text" v-model="name" id="name" class="form-control" placeholder="Full name" required>
@@ -24,13 +24,15 @@
               <div class="form-group">
                 <input type="text" v-model="regPassword" id="regPassword" class="form-control" placeholder="Club Password" required>
               </div>
-
               <div class="form-group">
-                <select id="account" v-model="is_raceorganiser" required class="form-control">
-                  <option value="0">Team Leader</option>
-                  <option value="1">Race Organiser</option>
-                  <option value="2">Both</option>
-                </select>
+              <b-form-select v-model="is_raceorganiser" id="account">
+                <template slot="first">
+                  <option :value="null" disabled>Select Account Type</option>
+                </template>
+                <option value="0">Team Leader</option>
+                <option value="1">Race Organiser</option>
+                <option value="2">Both</option>
+              </b-form-select>
               </div>
                 <b-button size="lg" variant="primary" block type="submit" @click="handleSubmit">Register</b-button>
             </form>
@@ -78,9 +80,11 @@
               .catch(error => {
                 _this.$swal("Registration Failed", error.response.data, "error");
                 _this.email = "";
-                _this.password="";
-                _this.name="";
-                _this.regPassword="";
+                _this.password = "";
+                _this.name = "";
+                _this.regPassword = "";
+                _this.confirm_password = "";
+                console.log(error);
               });
           } else {
             this.password = "";
