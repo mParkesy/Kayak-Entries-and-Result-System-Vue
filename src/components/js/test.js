@@ -26,47 +26,72 @@ export default {
       errors: [],
       results: [],
       textboxSubmission: "",
-      inviteEmail : ""
+      inviteEmail : "",
+      canView : false
     }
   },
   created(){
     let _this = this;
-    _this.loadRace();
-    _this.$http
-        .get('/boatnumbers?id=' + this.$route.params.id)
+    _this.loadRace(function() {
+      _this.$http
+        .get('/boatnumbers?id=' + _this.$route.params.id)
         .then(response => {
           _this.raceBoatNumbers = response.data.response;
-          /*   console.log(_this.allRaceResults);
-             let previous = null;
-             for(let i = 0; i < _this.allRaceResults.length; i++) {
-               if(previous != null){
-                 if(_this.allRaceResults[i].boatname != previous.boatname){
-                   _this.raceBoatNumbers.push(_this.allRaceResults[i].boatname);
-                 }
-               } else {
-                 _this.raceBoatNumbers.push(_this.allRaceResults[i].boatname);
-               }
-               previous = _this.allRaceResults[i];
-             }*/
         })
         .catch(error => {
           console.log(error);
           _this.$swal("Failed to get all boat numbers", "Please try again", "error");
         })
-    _this.loadDivisions();
-    _this.loadResult();
+      _this.loadDivisions();
+      _this.loadResult();
+      let user = JSON.parse(localStorage.getItem('user'));
+
+      if(_this.race.clubID == user.clubID){
+        _this.canView = true;
+      } else {
+        _this.canView = false;
+        _this.$swal("Access Denied", "You may not run this race", "error")
+          .then(() => {
+            window.location = "/raceorganiser";
+          })
+      }
+     /* let points = {
+        regionID : _this.raceView.regionID,
+        clubID : _this.raceView.clubID,
+        points : 0,
+        raceID : _this.raceView.raceID
+      }
+      _this.$http
+        .post('/insertclubpoints', {
+          data : points
+        })
+        .then(reponse => {
+
+        })
+        .catch(error => {
+          _this.$swal("Failed to assign boat numbers", error.response.data, "error");
+          _this.errors.push(e)
+        })*/
+
+    });
   },
   methods : {
-    loadRace(){
+    loadRace(callback){
       let _this = this;
       _this.$http
-        .get('/race?id=' + this.$route.params.id)
+        .get('/race?id=' +_this.$route.params.id)
         .then(response => {
           _this.race = response.data.response[0];
+          console.log(_this.race)
           let divTimes = splitOffsets(_this.race.boatOffset);
-          for(let i = 0; i < divTimes.length; i++){
-            _this.form.divs.push(divTimes[i].time);
+
+          if(divTimes.length != _this.form.divs.length){
+            for(let i = 0; i < divTimes.length; i++){
+              _this.form.divs.push(divTimes[i].time);
+            }
           }
+
+          callback();
         })
         .catch(error => {
           _this.$swal("Failed to get race data", "Please try again", "error");
@@ -95,24 +120,26 @@ export default {
     loadResult(){
       let _this = this;
       _this.$http
-        .get('/raceresult_order?id=' + this.$route.params.id)
+        .get('/raceresult_order?id=' + _this.$route.params.id)
         .then(response => {
           let x = response.data.response;
-          this.results = sortRaces(x);
+          _this.results = sortRaces(x);
         })
         .catch(e => {
-          this.errors.push(e)
+          _this.errors.push(e)
         })
     },
     handleStopwatch(evt){
       let _this = this;
       evt.preventDefault();
       let list = "";
+      console.log(_this.form.divs);
       for(let i = 0; i < _this.form.divs.length; i++){
         let value = _this.form.divs[i];
         if(value === undefined){
           value = "00:00";
         }
+        console.log(_this.divisions)
         list = list + _this.divisions[i].raceDivision + "-" + value + ",";
 
         /*
@@ -132,18 +159,21 @@ export default {
       _this.$http
         .post('/updateraceoffset', {
           list : list,
-          raceID : this.$route.params.id
+          raceID : _this.$route.params.id
         })
         .then(response => {
           _this.$swal("Stopwatch offsets submitted", "Division start times have been submitted, you can now input finish times", "success");
-          _this.loadRace();
+          _this.loadRace(function() {
+            _this.loadDivisions();
+            _this.loadResult();
+          });
         })
         .catch(error => {
+          console.log(error)
           _this.$swal("Failed to submit stopwatch times", "Please try again", "error");
         })
 
-      _this.loadDivisions();
-      _this.loadResult();
+
     },
     submitTime(boatnumber ,time){
       let _this = this;
@@ -154,7 +184,7 @@ export default {
           text : "Boat number cannot be empty"
         };
       } else {
-
+        console.log(boatnumber)
         let div = boatnumber[0];
         let list = splitOffsets(_this.race.boatOffset);
         let newTime = "";
@@ -397,7 +427,8 @@ export default {
     processResults(){
       let _this = this;
       let data = {
-        raceID : this.$route.params.id
+        raceID : this.$route.params.id,
+        processType : 0
       }
       _this.$http
         .post('/processresults' , {
@@ -405,9 +436,17 @@ export default {
         })
         .then(response => {
           console.log(response);
+          _this.$swal("Success", "Race processed", "success")
         })
         .catch(error => {
-          _this.$swal("Fail", "Failed to process results, please try again", "error");
+          if(error.response.status == 428){
+            _this.$swal("Time error", "Not all paddler times are filled in", "error");
+          } else if (error.response.status == 400){
+            _this.$swal("Processing error", "Please try again soon and make sure all details are filled in", "error");
+          } else {
+            _this.$swal("Fail", "Failed to process results, please try again", "error");
+          }
+
         })
     },
     validEmail(email){

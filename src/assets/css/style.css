@@ -34,6 +34,14 @@ h6 {
   font-family: 'Open Sans', 'Helvetica Neue', Arial, sans-serif;
 }
 
+.table thead th {
+  vertical-align: middle;
+}
+
+.table th, .table td {
+  padding: 0.75rem 0.5rem;
+}
+
 .modal-backdrop
 {
   opacity: 0.8 !important;
