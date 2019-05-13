@@ -1,12 +1,12 @@
 <template>
   <div id="runrace" class=" py-4">
     <b-container v-if="canView" class="text-center mx-auto">
-      <b-row class="col-lg-12 mt-4">
+      <b-row class="col-lg-14 mt-1">
         <b-col class="py-1" md="8">
           <h2 class="mb-0" style="text-align: left">Running race: {{ race.raceName }}</h2>
         </b-col>
       </b-row>
-      <b-row class="col-lg-12 mx-auto mt-4">
+      <b-row class="col-lg-14 mx-auto mt-4">
         <b-col class="panel py-2" md="12" style="background-color: white;">
           <b-button class="m-1" v-b-modal.about type="submit" variant="primary">About</b-button>
           <b-button class="m-1" v-b-modal.textSubmission type="submit" variant="primary">Text Box Time Submission</b-button>
@@ -68,7 +68,7 @@
           v-model="textboxSubmission"
         ></b-form-textarea>
       </b-modal>
-      <b-row class="col-lg-12 mx-auto mt-4">
+      <b-row class="col-lg-14 mx-auto mt-4">
         <b-col class="panel py-4" md="5" style="background-color: rgb(254, 193, 6);">
           <h3 class="pb-2">Enter stopwatch start times</h3>
           <p v-if="divisions.length == 0">There are no entries in divisions.</p>

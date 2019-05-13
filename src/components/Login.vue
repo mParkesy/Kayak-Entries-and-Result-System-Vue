@@ -37,8 +37,10 @@
     },
     created() {
       let _this = this;
-      if(_this.$route.query.result == 1){
+      if(_this.$route.query.result == "bfeqwhf8327rtgq3fq8o"){
         _this.$swal("Account Verified","" , "success");
+      } else {
+
       }
     },
     methods : {

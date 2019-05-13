@@ -1,6 +1,20 @@
 <template>
   <header>
-
+    <b-modal
+      id="about"
+      size="m"
+      centered
+      title="Herbert Blondie Race Management"
+      ref="about"
+      hide-footer
+    >
+      <p>
+        HBRM is an entry and results system for kayak and canoe marathon racing. It is a web application that maintains
+        its records with the use of a database of race results and paddler information.
+        A team leader or race organiser can sign up and carry out the tasks that they would normally do, however
+        everything is in a more centralised space and requires no importing of ranking lists or emailing.
+      </p>
+    </b-modal>
     <video autoplay muted loop id="myVideo">
       <source src="../assets/video.mp4" type="video/mp4">
     </video>
@@ -17,7 +31,7 @@
           </div>
           <div class="col-lg-8 mx-auto">
             <p class="text-faded mb-5">Welcome to the Herbert Blondie Race Management website, a new system aimed at making races easier to enter, run and manage.</p>
-            <a class="btn btn-primary btn-xl js-scroll-trigger" href="/about">Find Out More</a>
+            <a class="btn btn-primary btn-xl js-scroll-trigger" v-b-modal.about>Find Out More</a>
           </div>
         </div>
       </div>
@@ -43,7 +57,19 @@
 
 <script>
     export default {
-        name: "Home"
+        name: "Home",
+        data () {
+          return {
+
+          }
+      },
+      created() {
+        let _this = this;
+        if(_this.$route.query.message === "d41d8cd98f00b204e9800998ecf8427e"){
+          console.log("yes")
+          _this.$swal("Error", "Please login to get that information.", "error")
+        }
+      }
     }
 </script>
 

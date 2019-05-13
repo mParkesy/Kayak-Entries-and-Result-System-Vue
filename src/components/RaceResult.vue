@@ -1,11 +1,12 @@
 <template>
   <div id="raceresult">
-    <b-container class="text-center mx-auto col-lg-10 mx-auto pt-4 scrollX">
+    <b-container class="text-center mx-auto col-lg-10 pt-2 scrollX">
       <b-row class="col-lg-12">
         <h1> {{ racename }}</h1>
       </b-row>
       <b-row v-for="result in race" :key="result.raceID" class="col-lg-12">
-        <h2 style="text-align: left; font-size: 28px; font-weight: 600;"> Div {{ result[0].raceDivision }} </h2>
+        <h2 style="text-align: left; font-size: 28px; font-weight: 600;" v-if="result[0].raceDivision.includes('Div')">{{ result[0].raceDivision }} </h2>
+        <h2 style="text-align: left; font-size: 28px; font-weight: 600;" v-if="!result[0].raceDivision.includes('Div')">Div {{ result[0].raceDivision }} </h2>
         <table class="table col-lg-12 mx-auto mt-2 results" v-bind:class="result[0].raceDivision.includes('_') ? ' k2Table ' : {} ">
           <thead class="thead-dark">
             <tr>
@@ -55,7 +56,7 @@
           .get('/raceresult_order?id=' + this.$route.params.id)
           .then(response => {
             this.info = response.data.response;
-            console.log(this.info);
+
             this.race = sortRaces(this.info);
           })
           .catch(e => {
@@ -81,6 +82,7 @@
 
   #raceresult {
     background-color: rgb(228, 229, 231);
+    height: 100%;
   }
 
 

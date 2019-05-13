@@ -2,8 +2,20 @@
   <div id="raceentries" class="pt-4">
     <b-container class="text-center">
       <b-row class="col-lg-12 mx-auto mt-4">
-        <b-col class="p-0" md="7">
-          <h2 class="title">Make entries for {{ raceName }}</h2>
+        <b-col class="p-0 text-left" md="7">
+          <h2 class="title">Make entries for {{ raceName }} <b-button class="mb-2 py-1" v-b-toggle.collapse-1 variant="primary">How to</b-button></h2>
+
+          <b-collapse id="collapse-1" class="my-2">
+            <b-card>
+              <p class="card-text">
+                Press the K1 button to enter the paddler or search for them in the field below.
+                They will then appear on the right hand side in the entries so far list. Here, the K2 button can be
+                selected to either select the paddlers partner on the left hand side or via the small
+                search box that pops up. Make sure to submit entries using the button that will appear once
+                entries have been made.
+              </p>
+            </b-card>
+          </b-collapse>
           <p id="mobileText" class="title">Mobile mode: only search can be used to make entries</p>
           <div class="mb-3">
             <b-form-input
@@ -89,7 +101,7 @@
                 {{ paddler.name }}
               </td>
               <td align="center" valign="middle">
-                {{ paddler.division }}
+                {{ paddler.raceDivision }}
               </td>
               <td align="center" valign="middle">
                 <router-link :to="{}">
@@ -133,32 +145,40 @@
         _this.enteredPaddlers = [];
         _this.submittedEntries = [];
         let user = JSON.parse(localStorage.getItem('user'));
-        _this.$http
-          .get("/clubpaddlers?club=" + user.clubID)
-          .then(response => {
-            let paddlers = response.data.response;
-            _this.paddlers = paddlers;
-            _this.$http
-              .get("/clubraceentries?raceid=" + _this.raceID + "&clubid=" + user.clubID)
-              .then(response => {
-                let already  = response.data.response;
-                for(let i = 0; i < already.length; i++){
-                  _this.submittedEntries.unshift(already[i]);
-                }
-              })
-              .catch(e => {
-                console.log(e);
-              })
-          })
-          .catch(e => {
-            _this.$swal("There was an error", "There was an error loading the club paddlers, please try again.", "error");
-            console.log(e);
-          })
+
         _this.$http
           .get('/getracepaddlers?id=' + _this.raceID)
           .then(response => {
             let result = response.data.response;
             _this.allRacersEntered = result;
+            _this.$http
+              .get("/clubpaddlers?club=" + user.clubID)
+              .then(response => {
+                let paddlers = response.data.response;
+                _this.paddlers = paddlers;
+                _this.$http
+                  .get("/clubraceentries?raceid=" + _this.raceID + "&clubid=" + user.clubID)
+                  .then(response => {
+                    let already  = response.data.response;
+                    for(let i = 0; i < already.length; i++){
+                      _this.submittedEntries.unshift(already[i]);
+                      for(let x = 0; x < _this.allRacersEntered.length; x++){
+                        if(_this.allRacersEntered[x].boatID === already[i].boatID && _this.allRacersEntered[x].paddlerID != already[i].paddlerID && _this.allRacersEntered[x].clubID != already[i].clubID){
+                          _this.allRacersEntered[x].name = _this.allRacersEntered[x].name + " (" + _this.allRacersEntered[x].clubcode + ")";
+                          _this.submittedEntries.unshift(_this.allRacersEntered[x]);
+                        }
+                      }
+
+                    }
+                  })
+                  .catch(e => {
+                    console.log(e);
+                  })
+              })
+              .catch(e => {
+                _this.$swal("There was an error", "There was an error loading the club paddlers, please try again.", "error");
+                console.log(e);
+              })
           })
           .catch(e => {
             this.errors.push(e)
@@ -300,7 +320,7 @@
                           paddlerid : paddlerIDList[x]
                         })
                         .then(response2 => {
-
+                          // k2 entered
                         })
                         .catch(e => {
                           console.log(e);
