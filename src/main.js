@@ -33,21 +33,46 @@ Vue.component("Login", {
 import Axios from 'axios'
 
 const base = Axios.create({
-  baseURL: 'http://192.168.0.14:3000'
+  baseURL: 'http://localhost:3000'
 })
+
+
+
+/*Vue.http.interceptors.push({
+  request: function (request){
+    request.headers.authorization = localStorage.getItem('jwt');
+    return request;
+  },
+
+  response: function (response) {
+    console.log(response);
+    return response;
+  }
+});*/
 
 base.interceptors.request.use(
   reqConfig => {
-    reqConfig.headers.authorization = localStorage.getItem('jwt');
+    reqConfig.headers['Authorization'] = localStorage.getItem('jwt');
 
     return reqConfig;
   },
   err => Promise.reject(err),
 );
 
+base.interceptors.response.use(
+  res => {
+    console.log(res);
+    if(res.data === "no token provided"){
+      window.location = "/?message=d41d8cd98f00b204e9800998ecf8427e";
+    } else {
+      return res;
+    }
+
+  },
+  err => Promise.reject(err),
+);
+
 Vue.prototype.$http = base;
-
-
 
 /*base.interceptors.request.use(function (config) {
   let token = localStorage.getItem('jwt');

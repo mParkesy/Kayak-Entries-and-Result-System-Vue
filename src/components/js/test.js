@@ -82,7 +82,6 @@ export default {
         .get('/race?id=' +_this.$route.params.id)
         .then(response => {
           _this.race = response.data.response[0];
-          console.log(_this.race)
           let divTimes = splitOffsets(_this.race.boatOffset);
 
           if(divTimes.length != _this.form.divs.length){
@@ -124,6 +123,7 @@ export default {
         .then(response => {
           let x = response.data.response;
           _this.results = sortRaces(x);
+
         })
         .catch(e => {
           _this.errors.push(e)
@@ -142,19 +142,6 @@ export default {
         console.log(_this.divisions)
         list = list + _this.divisions[i].raceDivision + "-" + value + ",";
 
-        /*
-         _this.$http
-           .post('/updateracedivision', {
-             time : value,
-             raceID : this.$route.params.id,
-             raceDivision : _this.divisions[i].raceDivision
-           })
-           .then(response => {
-             console.log(response.data.response);
-           })
-           .catch(error => {
-             _this.$swal("Failed to get submit stopwatch times", "Please try again", "error");
-           })*/
       }
       _this.$http
         .post('/updateraceoffset', {
@@ -184,7 +171,6 @@ export default {
           text : "Boat number cannot be empty"
         };
       } else {
-        console.log(boatnumber)
         let div = boatnumber[0];
         let list = splitOffsets(_this.race.boatOffset);
         let newTime = "";
@@ -221,7 +207,8 @@ export default {
               data : {
                 boatname : boatnumber,
                 racetime : newTime,
-                outcome : _this.selected
+                outcome : _this.selected,
+                raceID : _this.$route.params.id
               }
             })
             .then(response => {
@@ -424,30 +411,45 @@ export default {
             })
         })
     },
-    processResults(){
+    processResults() {
       let _this = this;
-      let data = {
-        raceID : this.$route.params.id,
-        processType : 0
+      let noTimeList = [];
+      for (let i = 0; i < _this.raceBoatNumbers.length; i++) {
+        console.log(_this.raceBoatNumbers[i].time + " : " + _this.raceBoatNumbers[i].boatname);
+        if (_this.raceBoatNumbers.time == null ) {
+          noTimeList.push(_this.raceBoatNumbers[i]);
+        }
       }
-      _this.$http
-        .post('/processresults' , {
-          data : data
-        })
-        .then(response => {
-          console.log(response);
-          _this.$swal("Success", "Race processed", "success")
-        })
-        .catch(error => {
-          if(error.response.status == 428){
-            _this.$swal("Time error", "Not all paddler times are filled in", "error");
-          } else if (error.response.status == 400){
-            _this.$swal("Processing error", "Please try again soon and make sure all details are filled in", "error");
-          } else {
-            _this.$swal("Fail", "Failed to process results, please try again", "error");
-          }
+      if (noTimeList.length > 0) {
+        let sweetText = "Boat times are missing for the following boats:<br>";
+        for(let x = 0; x < noTimeList.length; x++){
+          sweetText = sweetText + noTimeList[x].boatname + "<br>";
+        }
+        _this.$swal("Boat times missing.",
+          sweetText, "error");
+      } else {
+        let data = {
+          raceID : this.$route.params.id,
+          processType : 0
+        }
+        _this.$http
+          .post('/processresults' , {
+            data : data
+          })
+          .then(response => {
+            _this.$swal("Success", "Race processed", "success")
+          })
+          .catch(error => {
+            if(error.response.status == 428){
+              _this.$swal("Time error", "Not all paddler times are filled in", "error");
+            } else if (error.response.status == 400){
+              _this.$swal("Processing error", "Please try again soon and make sure all details are filled in", "error");
+            } else {
+              _this.$swal("Fail", "Failed to process results, please try again", "error");
+            }
 
-        })
+          })
+      }
     },
     validEmail(email){
       var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;

@@ -26,6 +26,12 @@ function sortRaces(list){
     }
     rd = list[i].raceDivision;
   }
+  for(let i = 0; i < result.length; i++){
+    console.log(result[i]);
+    result[i].sort(function (a, b) {
+      return a.boatname - b.boatname;
+    })
+  }
   return result;
 }
 

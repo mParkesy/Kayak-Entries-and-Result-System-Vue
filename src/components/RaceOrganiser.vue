@@ -1,16 +1,26 @@
 <template>
-  <div id="raceorganiser" class=" py-4">
+  <div id="raceorganiser" class="py-4">
     <b-container class="text-center mx-auto">
-      <b-modal centered id="enterPaddler" ref="enterPaddler" title="Enter Paddler" @ok="">
-        <b-alert class="my-1 mx-3" :show="message.show" :variant="message.type">{{ message.text }}</b-alert>
-        <b-form class="form" @submit.stop.prevent="">
+      <b-modal hide-footer centered id="enterPaddler" ref="enterPaddler" title="Enter Paddler">
+        <b-alert class="my-2 mx-3" :show="message.show" :variant="message.type">{{ message.text }}</b-alert>
+        Type the paddlers name and click ok.
+        If you are entering a K2, search another name before pressing Ok.
+        <b-form class="form" @submit="">
           <b-form-input v-model="search"
                         type="search"
-                        placeholder="Search for a paddler"></b-form-input>
+                        placeholder="Search for a paddler"
+                        ref="search"
+                        autocomplete="off"
+          ></b-form-input>
 
           <b-list-group class="paddlerList" v-if="dropdown">
-            <b-list-group-item class="paddler" v-for="search_paddler in paddlerSearchResults" :key="search_paddler.paddlerID" @click="addPaddler(search_paddler)">{{ search_paddler.clubcode }} : {{ search_paddler.name }}</b-list-group-item>
+            <b-list-group-item class="paddler" v-for="search_paddler in paddlerSearchResults" :key="search_paddler.paddlerID" @click="selectSearch(search_paddler)">{{ search_paddler.clubcode }} : {{ search_paddler.name }}</b-list-group-item>
           </b-list-group>
+          <p v-if="Object.keys(paddler1).length > 0" class="text-left mt-4">Paddler 1: {{ paddler1.name }} ({{paddler1.clubcode}})</p>
+          <p v-if="Object.keys(paddler2).length > 0" class="text-left mt-4">Paddler 2: {{ paddler2.name }} ({{paddler2.clubcode}})</p>
+          <b-alert class="my-1 mx-3" :show="Object.keys(paddler1).length > 0 && Object.keys(paddler2).length > 0" variant="warning">Pressing Ok will enter the two paddlers above in K2</b-alert>
+          <b-alert class="my-1 mx-3" :show="Object.keys(paddler1).length > 0 && Object.keys(paddler2).length === 0" variant="warning">Pressing Ok will enter this paddler as a K1</b-alert>
+          <b-button v-on:click="enterPaddlerSubmit()" class="mt-3 py-1 px-4" size="sm" variant="primary">Submit</b-button>
         </b-form>
       </b-modal>
       <b-modal id="editRace" ref="modal" title="Edit Race" @ok="handleUpdateOk">
@@ -118,14 +128,16 @@
                         <th valign="middle" scope="col">Name</th>
                         <th scope="col">Club</th>
                         <th scope="col">Div</th>
+                        <th scope="col">Delete</th>
                       </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="line in divRace">
+                    <tr v-for="(line, index) in divRace">
                       <td>{{ line.boatname }}</td>
                       <td>{{ line.name }}</td>
                       <td>{{ line.clubcode }}</td>
                       <td>{{ line.division }}</td>
+                      <td><a v-on:click="paddlerRemoved(index)"><i class="fas fa-minus-circle minus"></i></a></td>
                     </tr>
                     </tbody>
                   </table>
@@ -169,7 +181,9 @@
             allRacersEntered : [],
             clubList : [],
             selected : null,
-
+            paddler1 : {},
+            paddler2: {},
+            club : []
           }
         },
         created() {
@@ -184,6 +198,12 @@
                 _this.$swal("You have no races", "", "error");
                 console.log(error)
               })
+          _this.$http
+            .get('/club?id='+user.clubID)
+            .then(response => {
+              _this.club = response.data.response[0];
+            })
+
         },
         methods : {
           handleSubmit(e){
@@ -197,7 +217,7 @@
               date : newDate,
               clubID : userID,
               year: year,
-              region : _this.raceView.regionID
+              region : _this.club.regionID
             })
               .then(response => {
                 _this.$swal("Success", "The race has been added and should be accessible in your control panel.", "success")
@@ -247,7 +267,6 @@
               .then(response => {
                 let results = sortRaces(response.data.response);
                 _this.results = results;
-
               })
               .catch(e => {
                 this.errors.push(e)
@@ -291,7 +310,7 @@
             }
           },
           seeDivision(race, selected){
-            let _this= this;
+            let _this = this;
             _this.divRace = race;
             _this.selected = selected;
             _this.showDiv = true;
@@ -311,10 +330,10 @@
                 data : data
             })
               .then(response => {
-                _this.getRaceInfo(_this.raceView);
+
                 _this.$swal("Success", "Boat numbers have been assigned.", "success")
                   .then(() => {
-                    this.$router.go();
+                    _this.getRaceInfo(_this.raceView);
                   })
             })
               .catch(error => {
@@ -325,6 +344,102 @@
           closeDropdown(){
             let _this = this;
             _this.dropdown = false;
+          },
+          selectSearch(paddler){
+            let _this = this;
+            let duplicate = false;
+            for(let i = 0; i < _this.allRacersEntered.length; i ++){
+              let current = _this.allRacersEntered[i];
+              if(paddler.paddlerID == current.paddlerID){
+                duplicate = true;
+              }
+            }
+            if(duplicate) {
+              _this.message = {
+                show: true,
+                type: "danger",
+                text: "Duplicate Entry"
+              };
+            } else if(Object.keys(_this.paddler1).length === 0){
+              _this.paddler1 = paddler;
+            } else if(Object.keys(_this.paddler1).length > 0 && Object.keys(_this.paddler2).length === 0){
+              _this.paddler2 = paddler;
+            }
+            _this.dropdown = false;
+            _this.search = "";
+          },
+          enterPaddlerSubmit(){
+            let _this = this;
+            let paddler1_length = Object.keys(_this.paddler1).length;
+            let paddler2_length = Object.keys(_this.paddler2).length;
+            if(paddler1_length > 0 && paddler2_length === 0){
+              // k1 entry
+              _this.addPaddler(_this.paddler1);
+              _this.paddler1 = [];
+              _this.paddler2 = [];
+              _this.message = {};
+              console.log("k1")
+            } else if (paddler1_length > 0 && paddler2_length > 0){
+              // k2 entry
+              console.log("k2")
+              let newDiv = Math.floor((parseInt(_this.paddler1.division) + parseInt(_this.paddler2.division)) / 2);
+              newDiv = newDiv + "_" + newDiv;
+              _this.$http
+                .post('/insertboatresult',{
+                  race : _this.raceView.raceID,
+                  div : newDiv
+                })
+                .then(response => {
+                  let boatID = response.data.response.insertId;
+
+                  let paddlerIDList = [_this.paddler1.paddlerID, _this.paddler2.paddlerID];
+                  console.log(_this.paddler1);
+                  for(let i = 0; i < 2; i++){
+                    _this.$http
+                      .post('/insertpaddlerboat', {
+                        boatid : boatID,
+                        paddlerid : paddlerIDList[i]
+                      })
+                      .then(response2 => {
+                        _this.paddler1 = [];
+                        _this.paddler2 = [];
+                        _this.message = {};
+                        _this.message = {
+                          show : true,
+                          type : "success",
+                          text : "K2 entry submitted"
+                        };
+                        _this.getRaceInfo(_this.raceView);
+                      })
+                      .catch(e => {
+                        _this.message = {
+                          show : true,
+                          type : "danger",
+                          text : "K2 entry failed, please try again"
+                        };
+                        console.log(e);
+                      })
+                  }
+                })
+                .catch(e => {
+                  _this.message = {
+                    show : true,
+                    type : "danger",
+                    text : "K2 entry failed, please try again"
+                  };
+                  console.log(e);
+                })
+            } else {
+              _this.message = {
+                show : true,
+                type : "danger",
+                text : "Error, please try again."
+              };
+              _this.paddler1 = [];
+              _this.paddler2 = [];
+              _this.message = {};
+              _this.getRaceInfo(_this.raceView);
+            }
           },
           addPaddler(paddler){
             let _this = this;
@@ -364,26 +479,47 @@
                       _this.search = "";
                     })
                     .catch(e => {
-                      _this.$swal("K2 Entry error", "The page will now refresh, please check and see what entries were submitted and correct any errors.", "error")
+                      _this.$swal("Entry error", "The page will now refresh, please check and see what entries were submitted and correct any errors.", "error")
                         .then(() => {
                           this.$router.go();
                         })
                     })
                 })
                 .catch(e => {
-                  _this.$swal("K2 Entry error", "The page will now refresh, please check and see what entries were submitted and correct any errors.", "error")
+                  _this.$swal("Entry error", "The page will now refresh, please check and see what entries were submitted and correct any errors.", "error")
                     .then(() => {
                       this.$router.go();
                     })
                   console.log(e);
                 })
             }
-          }
+          },
+          paddlerRemoved(index){
+            let _this = this;
+            let boatID = _this.divRace[index].boatID;
+
+            _this.$http
+              .post('/deleteentry', {
+                boatid : boatID
+              })
+              .then(response => {
+                _this.divRace.splice(index, 1);
+                _this.getRaceInfo(_this.raceView);
+                _this.$forceUpdate();
+              })
+              .catch(e => {
+                console.log(e);
+                _this.$swal("Failed to delete entry", "If the error persists please contact an administrator", "error");
+              })
+
+          },
+
         },
       watch: {
         search: function() {
           let _this = this;
           if(_this.search.length >= 3){
+            _this.message = {};
             _this.dropdown = true;
             _this.$http
               .get('search?term=' + _this.search)
@@ -405,8 +541,8 @@
           } else {
             _this.closeDropdown();
           }
-        }
-      },
+        },
+      }
     }
 </script>
 
@@ -416,7 +552,8 @@
   }
 
  #raceorganiser {
-    background-color: rgb(228, 229, 231);
+   background-color: rgba(203, 205, 206, 0.3);
+   height: 100%;
  }
 
  th, td {
@@ -490,6 +627,11 @@
     padding: 12px 12px 12px 5px;
     text-decoration: none !important;
     cursor: pointer;
+  }
+
+  .minus {
+    color: red;
+    font-size: 28px;
   }
 
 </style>
