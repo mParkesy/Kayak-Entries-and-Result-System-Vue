@@ -1,3 +1,8 @@
+<!--
+  This page displays all the paddlers that have been entered into a race from a particular club.
+  This is to be accessed by a race organiser.
+-->
+
 <template>
   <div id="clubentries">
     <b-container class="text-center mx-auto col-lg-10 mx-auto pt-4 scrollX">
@@ -14,7 +19,7 @@
             </tr>
             </thead>
             <tbody>
-            <tr v-for="(result, index) in list" :key="result.raceID">
+            <tr v-for="(result) in list" :key="result.raceID">
               <td align="center">
                 {{ result.boatname }}
               </td>
@@ -47,14 +52,20 @@
           club : []
         }
       },
+      // on creation of component get necessary details
       created() {
         let _this = this;
-
+        // get all entries for club for this race
         _this.$http
           .get("/clubraceentries?raceid=" + _this.$route.params.id + "&clubid=" + _this.$route.params.club)
           .then(response => {
             _this.list = response.data.response;
+            // reverse the list so higher division paddlers are first
             _this.list.reverse();
+            _this.list.sort(function (a, b) {
+              return parseInt(a.boatnumber) - parseInt(b.boatnumber);
+            })
+            // get the fulls details for the club
             _this.$http
               .get('club?id=' + _this.$route.params.club)
               .then(response => {
@@ -71,12 +82,10 @@
       },
       updated(){
           let _this = this;
+          // if the club details are fully loaded in then show print view
           if(_this.club.clubname != null){
             window.print();
           }
-      },
-      methods : {
-
       }
     }
 </script>
@@ -89,7 +98,6 @@
   #clubentries {
     background-color: rgb(228, 229, 231);
   }
-
 
   @media only screen and (max-width: 730px) {
     .scrollX {

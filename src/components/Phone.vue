@@ -1,3 +1,7 @@
+<!--
+  For use when someone is invited to help input results and the page link is sent via email.
+-->
+
 <template>
   <div id="phone" class="pt-1 pb-5">
     <b-container class="mx-auto">
@@ -30,7 +34,6 @@
 </template>
 
 <script>
-  import {hmsToSeconds, secondsToHMS, splitOffsets} from "../worker";
 
     export default {
       name: "Phone",
@@ -42,18 +45,22 @@
           selected : "Finish"
         }
       },
+      // when the component is created
       created() {
         let _this = this;
+        // check that the parameter in the url allows the user access
         _this.$http
-          .get('/accesspage?id=' + this.$route.params.id)
+          .get('/accesspage?id=' + _this.$route.params.id)
           .then(response => {
             _this.access = response.data.response[0];
+            // if they don't have access show alert and sent to homepage
             if(_this.access.accessType != 0){
               _this.$swal("Access Denied", "You may not access this page.", "error")
                 .then(() => {
-                  this.$router.push('/')
+                  _this.$router.push('/')
                 })
             } else {
+              // if they do have acces get race details and allow display of page
               _this.$http
                 .get('/race?id='  + _this.access.raceID)
                 .then(response => {
@@ -71,9 +78,10 @@
           })
       },
       methods : {
+        // submits times to the back end
         submitTimes(evt){
           evt.preventDefault();
-/*          let _this = this;
+  /*          let _this = this;
           if(_this.textboxSubmission.length > 0){
             let list = _this.textboxSubmission.split('\n');
             for(let i = 0; i < list.length; i++){

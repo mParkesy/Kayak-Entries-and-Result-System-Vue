@@ -1,3 +1,7 @@
+<!--
+  The run race component where the race organiser goes throught the process of running a race.
+-->
+
 <template>
   <div id="runrace" class=" py-4">
     <b-container v-if="canView" class="text-center mx-auto">
@@ -134,7 +138,9 @@
   </div>
 </template>
 
+
 <script src="./js/test.js">
+  // code in separate script
 </script>
 
 <style scoped>

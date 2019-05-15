@@ -1,3 +1,8 @@
+<!--
+  The race entries page accessed by a team leader for a specific race.
+  The entries can be made and then submitted to the database.
+-->
+
 <template>
   <div id="raceentries" class="pt-4">
     <b-container class="text-center">
@@ -140,29 +145,36 @@
       },
       created(){
         let _this = this;
+        // get info from url
         _this.raceName = this.$route.params.name;
         _this.raceID = this.$route.params.id;
         _this.enteredPaddlers = [];
         _this.submittedEntries = [];
+        // get local storage
         let user = JSON.parse(localStorage.getItem('user'));
-
+        // get entries in race so far
         _this.$http
           .get('/getracepaddlers?id=' + _this.raceID)
           .then(response => {
             let result = response.data.response;
             _this.allRacersEntered = result;
+            //get club paddlers with the number of races they have done
             _this.$http
               .get("/clubpaddlers?club=" + user.clubID)
               .then(response => {
                 let paddlers = response.data.response;
                 _this.paddlers = paddlers;
+                // get the entries for the club so far
                 _this.$http
                   .get("/clubraceentries?raceid=" + _this.raceID + "&clubid=" + user.clubID)
                   .then(response => {
                     let already  = response.data.response;
                     for(let i = 0; i < already.length; i++){
+                      // add the already made entries to the submitted entries list for view on page
                       _this.submittedEntries.unshift(already[i]);
+                      // loop over all racers entered to make sure that any mixed club K2s are displayed
                       for(let x = 0; x < _this.allRacersEntered.length; x++){
+                        // if there is a mix club K2 then add them to the list of submitted entries
                         if(_this.allRacersEntered[x].boatID === already[i].boatID && _this.allRacersEntered[x].paddlerID != already[i].paddlerID && _this.allRacersEntered[x].clubID != already[i].clubID){
                           _this.allRacersEntered[x].name = _this.allRacersEntered[x].name + " (" + _this.allRacersEntered[x].clubcode + ")";
                           _this.submittedEntries.unshift(_this.allRacersEntered[x]);
@@ -176,7 +188,7 @@
                   })
               })
               .catch(e => {
-                _this.$swal("There was an error", "There was an error loading the club paddlers, please try again.", "error");
+                _this.$swal("Error", "There was an error loading the club paddlers, please try again.", "error");
                 console.log(e);
               })
           })
@@ -185,83 +197,89 @@
           })
       },
       methods : {
+        // close the dropdown from a search
         closeDropdown(){
           let _this = this;
           _this.dropdown = false;
         },
+        // get css class for k2 entry
         getClass(check){
           if(check.includes("_")){
             return { 'noborder' : true }
           }
         },
+        // checks to see if entry is a duplicate entry
         checkDuplicate(index) {
           let _this = this;
           let duplicate = false;
+          // loop over all racers entered and check
           for (let i = 0; i < _this.allRacersEntered.length; i++) {
             if (_this.allRacersEntered[i].paddlerID === _this.paddlers[index].paddlerID) {
               _this.$swal("Duplicate Entry", "This paddler has already been entered.", "error");
               duplicate = true;
             }
           }
+
+          // loop over submitted entries and check
           for (let i = 0; i < _this.submittedEntries.length; i++) {
             if (_this.submittedEntries[i].paddlerID === _this.paddlers[index].paddlerID) {
               _this.$swal("Duplicate Entry", "This paddler has already been entered.", "error");
               duplicate = true;
             }
           }
+
+          // loop over entered paddlers for current session and check
           for (let i = 0; i < _this.enteredPaddlers.length; i++) {
             console.log("Count: " + i + ", ID: " + _this.enteredPaddlers[i].paddlerID + ", Compared to: " + _this.paddlers[index].paddlerID);
             if (_this.enteredPaddlers[i].paddlerID === _this.paddlers[index].paddlerID) {
               _this.$swal("Duplicate Entry", "This paddler has already been entered.", "error");
-              console.log("yesy");
               duplicate = true;
             }
           }
           return duplicate;
         },
+        // when a paddler is entered into a search field
         paddlerEntered(index){
           let _this = this;
+          // set field to blank
           _this.search = "";
+          // close dropdown
           _this.closeDropdown();
+          // check to see if duplicate
           if(!_this.checkDuplicate(index)){
             _this.enteredPaddlers.unshift(_this.paddlers[index]);
           }
-          /*if(_this.enteredPaddlers.includes(paddler)){
-            _this.$swal("Duplicate Entry", "This paddler has already been entered.", "error");
-          } else {
-            _this.enteredPaddlers.push(paddler);
-          }*/
         },
+        // padler entered into separate search field
         paddlerEnteredSearch(searchPaddler){
           let _this = this;
           _this.search = "";
           _this.closeDropdown();
-          console.log("Searched paddler: " + searchPaddler.name);
+          // check to see if duplicate entry
           for(let i = 0; i < _this.paddlers.length; i++){
             if(_this.paddlers[i].paddlerID == searchPaddler.paddlerID){
-              console.log("found in list");
               if(!_this.checkDuplicate(i)){
                 _this.enteredPaddlers.unshift(_this.paddlers[i]);
               }
-            } else {
-
             }
           }
-
         },
+        // if paddler removed from system
         paddlerRemoved(index, option){
           let _this = this;
+          // get local storage details
           let user = JSON.parse(localStorage.getItem('user'));
           // if submitted entries
           if(option == 0){
             // submittedEntries
             let boatID = _this.submittedEntries[index].boatID;
-
+            // delete the entry in the database
             _this.$http
               .post('/deleteentry', {
                 boatid : boatID
               })
               .then(response => {
+                // delete the paddler from the submitted entries list
                 for(let i = 0; i < _this.submittedEntries.length; i++){
                   if(_this.submittedEntries[i].boatID === boatID && _this.submittedEntries[index].paddlerID != _this.submittedEntries[i].paddlerID){
                     _this.submittedEntries.splice(i, 1);
@@ -289,7 +307,6 @@
                 // if the remaining paddler is from another club then remove
                 if(_this.enteredPaddlers[i].clubID != user.clubID){
                   _this.$swal("K2 Fully deleted", "The remaining paddler is from different club, please re-enter the K2", "error")
-                  console.log("deleting: " + _this.enteredPaddlers[i].name);
                   _this.enteredPaddlers.splice(i, 1);
                 }
               }
@@ -297,13 +314,19 @@
             _this.enteredPaddlers.splice(index, 1);
           }
         },
+        // when entries are being submitted
         submitEntries(){
           let _this = this;
+          // loop over entries to be submiited
           for(let i = 0; i < _this.enteredPaddlers.length; i++){
+            // if k2
             if(_this.enteredPaddlers[i].k2 == "yes" && _this.enteredPaddlers[i+1] != null){
               if((_this.enteredPaddlers[i].boatID == _this.enteredPaddlers[i+1].boatID)){
+                // calculate new div
                 let newDiv = Math.floor((parseInt(_this.enteredPaddlers[i+1].division) + parseInt(_this.enteredPaddlers[i].division)) / 2);
+                // format new div
                 newDiv = newDiv + "_" + newDiv;
+                // insert boat into database and get the id for insert
                 _this.$http
                   .post('/insertboatresult', {
                     race: _this.raceID,
@@ -311,8 +334,9 @@
                   })
                   .then(response => {
                     let boatID = response.data.response.insertId;
+                    // get the boat ID and make an array of paddler IDs
                     let paddlerIDList = [_this.enteredPaddlers[i].paddlerID, _this.enteredPaddlers[i+1].paddlerID];
-
+                    // loop over two paddlers and insert them into paddler/boat tracking table
                     for(let x = 0; x < 2; x++){
                       _this.$http
                         .post('/insertpaddlerboat', {
@@ -339,7 +363,9 @@
                     console.log(e);
                   })
               }
+              // if its a k1 entry
             } else if (_this.enteredPaddlers[i].k2 != "yes") {
+              // submit to database straight away
               _this.$http
                 .post('/insertboatresult', {
                   race : _this.raceID,
@@ -347,6 +373,7 @@
                 })
                 .then(response => {
                   let boatID = response.data.response.insertId;
+                  // use returned boat ID to fill out paddler boat table
                   _this.$http
                     .post('/insertpaddlerboat', {
                       boatid : boatID,
@@ -360,6 +387,7 @@
 
                     })
                     .catch(e => {
+                      console.log(e);
                       _this.$swal("Error", "The page will now refresh, please check and see what entries were submitted and correct any errors.", "error")
                         .then(() => {
                           this.$router.go();
@@ -376,14 +404,13 @@
             }
           }
         },
+        // if k2 button pressed then go into k2 mode
         addK2(index, option){
           let _this = this;
           if(option == 0){
-            // do k2 stuff with submitted entries
-
           } else {
             _this.k2Mode = true;
-            // do k2 stuff with current session entries
+            // generate a temporary boat number and add a blank partner into the list of paddlers
             _this.enteredPaddlers[index]["boatID"] = _this.session_boatID;
             _this.enteredPaddlers[index]["k2"] = "yes";
             let data = {
@@ -399,17 +426,18 @@
 
             _this.enteredPaddlers.splice(index + 1, 0, data);
             _this.selectedK2index = index +1;
-            console.log("added blank paddler");
           }
         },
+        // if another paddler is selected whilst in k2 mode
         addToK2(paddler, index, option){
           let _this = this;
+          // set values
           _this.search = "";
           _this.dropdown = false;
           if(option == 0){
-            // do submitted
           } else {
             let duplicate = false;
+            // check for duplicate entry, if not then continue
             for (let i = 0; i < _this.allRacersEntered.length; i++) {
               if (_this.allRacersEntered[i].paddlerID == paddler.paddlerID) {
                 _this.$swal("Duplicate Entry", "This paddler has already been entered.", "error");
@@ -418,8 +446,9 @@
             }
             if(!duplicate) {
               // do current
-              //console.log(_this.enteredPaddlers[index]);
+              // check if k2 and blank partner for other paddler
               if (_this.enteredPaddlers[index].k2 === "yes") {
+                // if so, add correct paddler info
                 _this.enteredPaddlers[index] = {
                   k2: "yes",
                   boatID: _this.session_boatID,
@@ -432,40 +461,39 @@
                 }
                 _this.session_boatID++;
               }
-              //console.log(_this.enteredPaddlers);
               _this.k2Mode = false;
             }
-          }
-        },
-        getK2Partner(boatID){
-          let _this = this;
-          for(let i = 0; i < _this.allRacersEntered; i++){
-
           }
         }
       },
       watch: {
+        // if a search is carried out
         search: function() {
           let _this = this;
+          // if search length more than 3
           if(_this.search.length >= 3){
             _this.dropdown = true;
+            // do a search in database for a paddler
             _this.$http
               .get('search?term=' + _this.search)
               .then(response => {
+                // get response and if there is no result then alert user
                 _this.paddlerSearchResults = response.data.response;
                 if(_this.paddlerSearchResults.length === 0){
                   _this.$swal("No search results", "", "error");
                 } else if (_this.paddlerSearchResults.length === 1){
-                  //this.handlePaddler(this.paddlers[0]);
+
                 }
               })
               .catch(error => {
                 _this.$swal("Search error", error.response.data, "error");
               })
           } else {
+            // close dropdown
             _this.closeDropdown();
           }
         },
+        // whilst search is less than 3, keep dropdown field closed
         clubSearch: function() {
           let _this = this;
           if(_this.search.length < 3){
@@ -474,6 +502,7 @@
         }
       },
       computed : {
+        // for searching for paddlers within the team leaders club
         clubSearch: function() {
           let _this = this;
           return _this.paddlers.filter(
@@ -500,11 +529,6 @@
     text-align: left;
     font-size: 28px;
     font-weight: 600;
-  }
-
-  .plus {
-    color: lightgreen;
-    font-size: 28px;
   }
 
   .minus {

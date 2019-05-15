@@ -20,6 +20,10 @@ import ClubEntries from "../components/ClubEntries";
 
 Vue.use(Router)
 
+/**
+ * Define the routers routes that can be used
+ * @type {VueRouter}
+ */
 let router = new Router({
   mode: 'history',
   routes: [
@@ -118,6 +122,10 @@ let router = new Router({
   ]
 })
 
+/**
+ * Before each router is changed, check the user has access to that page
+ * and if they don't then send them to login page
+ */
 router.beforeEach((to, from, next) => {
   if(to.matched.some(record => record.meta.requiresAuth)) {
     if (localStorage.getItem('jwt') === null) {
@@ -126,7 +134,7 @@ router.beforeEach((to, from, next) => {
       let user = JSON.parse(localStorage.getItem('user'))
       let is_organiser = 0;
 
-      Axios.post('http://localhost:3000/isorganiser', {
+      Axios.post('http://192.168.0.47:3000/isorganiser', {
         userID : user.userID
       })
         .then(response => {

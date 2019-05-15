@@ -1,3 +1,7 @@
+<!--
+  The login component of the website. It contains a basic form that can be filled in.
+-->
+
 <template>
   <header>
     <div class="masthead text-center text-white d-flex" >
@@ -36,6 +40,7 @@
       }
     },
     created() {
+      // if the verification token is sent to this page then reveal verification success message
       let _this = this;
       if(_this.$route.query.result == "bfeqwhf8327rtgq3fq8o"){
         _this.$swal("Account Verified","" , "success");
@@ -44,10 +49,13 @@
       }
     },
     methods : {
+      // on submission of form
       handleSubmit(e){
         let _this= this;
         e.preventDefault()
+        // if valid password length
         if (this.password.length > 0) {
+          // call database for login
            this.$http.post('/login', {
             email: this.email,
             password: this.password
@@ -55,30 +63,37 @@
             .then(response => {
               let data = response.data;
               let active = data.user.active;
+              // if account is active and exists
               if(active == 1){
                 let is_organiser = data.user.account;
                 let user = data.user;
                 delete user["account"];
+                // set user and token to local storage
                 localStorage.setItem('user',JSON.stringify(response.data.user));
                 localStorage.setItem('jwt',response.data.token);
 
+                // if jwt in local storage is set
                 if (localStorage.getItem('jwt') != null){
+                  // send to login page
                   this.$emit('loggedIn');
                   if(this.$route.params.nextUrl != null){
+                    // send to next url
                     this.$router.push(this.$route.params.nextUrl);
                   }
                   else {
+                    // if is race organiser send to race organiser page
                     if(is_organiser === 1){
                       window.location = "/raceorganiser";
                       //this.$router.push('raceorganiser');
                     }
+                    // otherwise send to team leader page
                     else {
                       window.location = "/teamleader";
-                      //this.$router.push('teamleader');
                     }
                   }
                 }
               } else {
+                // send error if login details are wrong
                 _this.$swal("Login Failed", "Your account may not be verified", "error");
               }
             })

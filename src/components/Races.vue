@@ -1,5 +1,8 @@
-<template>
+<!--
+  The races component which shows all the races based on the filter provided, either year or region or both.
+-->
 
+<template>
     <div id="races">
       <b-container class="text-center mx-auto">
         <b-row class="col-lg-12 mx-auto pt-4 mt-0">
@@ -17,7 +20,7 @@
 
         <b-row class="col-lg-12 mx-auto mt-4">
           <table class="table table-bordered">
-            <thead v-if="loading" class="thead-dark">
+            <thead class="thead-dark">
             <tr>
               <th scope="col">Race Name</th>
               <th scope="col">Year</th>
@@ -48,7 +51,6 @@
         info: [],
         errors: [],
         years: [],
-        loading: false,
         regions: [],
         selectYear : 0,
         selectRegion: 0,
@@ -58,54 +60,66 @@
     methods : {
       getRaces: function (year, region, name) {
         let _this = this;
-        this.selectYear = year;
-        this.selectRegion = region;
+        _this.selectYear = year;
+        _this.selectRegion = region;
         let call = '/races';
         if(region !== 0 && region !== 11){
           call +=  "?year=" + year + "&region=" + region;
-          this.selectRegionName = name;
+          _this.selectRegionName = name;
         } else {
           call += "?year=" + year;
-          this.selectRegionName = "All";
+          _this.selectRegionName = "All";
         }
         call += "&process=2"
-        this.$http
+        _this.$http
           .get(call)
           .then(response => {
-            this.loading = true;
-            this.info = response.data.response;
-            console.log(this.info);
-            if(this.info.length == 0){
-              this.selectYear--;
-              this.getRaces(this.selectYear, this.selectRegion, this.selectRegionName);
+            _this.info = response.data.response;
+            if(_this.info.length == 0){
+              _this.selectYear--;
+              _this.selectRegion = 11;
+              _this.selectRegionName = "ALL";
+              _this.getRaces(_this.selectYear, _this.selectRegion, _this.selectRegionName);
+              _this.$swal("No results", "There were no results for that search filter", "error");
+            } else {
             }
           })
           .catch(e => {
-            this.errors.push(e)
-            this.loading = false;
+            // error getting filter info
+            _this.errors.push(e)
+            console.log(e)
             _this.$swal("There was an error", "There are no race results to show.", "error");
           })
       }
     },
     created() {
-      this.$http
+      let _this = this;
+      // get current race year
+      _this.$http
           .get('/race_year')
           .then(response => {
-            this.years = response.data.response;
-            this.getRaces(this.years.slice(-1)[0].year, this.selectRegion);
-            this.selectYear = this.years.slice(-1)[0].year;
-            this.selectRegionName = "All"
+            _this.years = response.data.response;
+            // get races in that race year with default region
+            _this.getRaces(_this.years.slice(-1)[0].year, _this.selectRegion);
+            _this.selectYear = _this.years.slice(-1)[0].year;
+            _this.selectRegionName = "All"
           })
           .catch(e => {
-            this.errors.push(e)
+            console.log(e)
+            _this.$swal("Race result error", "Please reload the page", "error");
+            _this.errors.push(e)
           }),
-      this.$http
+        // get the list of regions for the filter
+        _this.$http
         .get('/regions')
         .then(response => {
-          this.regions = response.data.response;
+          _this.regions = response.data.response;
         })
         .catch(e => {
-          this.errors.push(e)
+          console.log(e)
+          // error getting regions
+          _this.$swal("Race result error", "Please reload the page", "error");
+          _this.errors.push(e)
         })
 
 
@@ -124,7 +138,4 @@
     width: 1px;
   }
 
-/*  #races {
-    background-color: rgb(228, 229, 231);
-  }*/
 </style>

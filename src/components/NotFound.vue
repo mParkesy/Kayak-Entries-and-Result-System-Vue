@@ -1,3 +1,8 @@
+<!--
+  This component is shown when a page that does not exist is viewed on the front end application.
+  It is a 404 page not found page.
+-->
+
 <template>
   <div class="topheader">
     <div class="masthead text-center text-white d-flex">

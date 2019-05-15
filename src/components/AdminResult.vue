@@ -1,3 +1,8 @@
+<!--
+  This page is accessed by a race organiser to view the latest results for the race they are running
+  or it is accessed by a regional advisor who then can make changes to the race results.
+-->
+
 <template>
   <div id="adminresult">
     <b-container class="text-center mx-auto col-lg-10 mx-auto pt-4 scrollX">
@@ -5,7 +10,7 @@
         <h1> {{ racename }}</h1>
       </b-row>
       <b-form @submit="handleSubmit">
-      <b-row v-for="(result, index) in race" :key="result.raceID" class="col-lg-12">
+      <b-row v-for="(result) in race" :key="result.raceID" class="col-lg-12">
         <h2 style="text-align: left; font-size: 28px; font-weight: 600;"> Div {{ result[0].raceDivision }} </h2>
           <table class="table col-lg-12 mt-2 results" v-bind:class="result[0].raceDivision.includes('_') ? ' k2Table ' : {} ">
             <thead class="thead-dark">
@@ -90,9 +95,11 @@
         }
       },
       created() {
+        // on creation of the component
         let _this = this;
         let user = JSON.parse(localStorage.getItem('user'));
         let organiser = false;
+        // if the user exists in local storage then check if they are an organiser
         if(user != null){
           _this.$http.post('/isorganiser', {
             userID : user.userID
@@ -100,19 +107,22 @@
             .then(response => {
               let organiser_check = response.data.response[0];
               if(organiser_check.account > 0) {
+                // set to race organiser mode
                 _this.isOrganiser = true;
               }
-
+              // if its a regional advisor accessing page, check they have access
               if(_this.$route.query.auth != undefined){
                 let auth = _this.$route.query.auth;
                 _this.$http
                   .get('/accesspage?id=' + auth)
                   .then(response => {
                     _this.access = response.data.response[0];
+                    // if the advisor has access show parts of page
                     if(_this.access.accessType == 1){
                       _this.isRegional = true;
                       _this.isOrganiser = false;
                     } else {
+                      // deny access if not
                       _this.$swal("Access Denied", "You may not access this page.", "error")
                         .then(() => {
                           this.$router.push('/')
@@ -138,6 +148,7 @@
             })
         }
 
+        // get all the race results and sort
         _this.$http
           .get('/raceresult_order?id=' + _this.$route.params.id)
           .then(response => {
@@ -148,6 +159,7 @@
           .catch(e => {
             _this.errors.push(e)
           }),
+          // get the race details and store appropriately
           _this.$http
             .get('/race?id=' + _this.$route.params.id)
             .then(response => {
@@ -159,14 +171,20 @@
             })
       },
       methods : {
+        /**
+         * For submitting the regional advisor changes
+         * @param e The event
+         */
           handleSubmit(e){
             let _this = this;
             e.preventDefault();
             let update = [];
+            // loops over each race
             for(let i = 0; i < _this.race.length; i++){
+              // loop over each result in race
               for(let x = 0; x < _this.race[i].length; x++){
                 let current = _this.race[i][x];
-
+                // push to an array of json objects
                 update.push({
                   raceID : _this.$route.params.id,
                   position : current.position,
@@ -177,6 +195,7 @@
               }
 
             }
+            // send a mass update with that array
             _this.$http.post('/mass_updateboatresult', {
               data : update
             })
@@ -185,6 +204,7 @@
                   process : 2,
                   raceID : _this.$route.params.id,
                 }
+                // update race process field to 2 so that it can be viewed by public
                 _this.$http
                   .post('/updateraceprocess', {
                     data : data
@@ -194,6 +214,7 @@
                       raceID : this.$route.params.id,
                       processType : 1
                     }
+                    // run the process results function on the back end
                     _this.$http
                       .post('/processresults' , {
                         data : data
@@ -226,12 +247,10 @@
     background-color: rgb(228, 229, 231);
   }
 
-
   @media only screen and (max-width: 730px) {
     .scrollX {
       overflow-x: scroll;
     }
   }
-
 
 </style>

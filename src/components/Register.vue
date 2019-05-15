@@ -1,3 +1,7 @@
+<!--
+  This is the registration component for a team leader or race organiser to sign up to the site.
+-->
+
 <template>
   <header>
     <div class="masthead text-center text-white d-flex ">
@@ -59,24 +63,29 @@
         }
       },
       methods : {
+          // if form submitted
           handleSubmit(e){
           let _this= this;
           e.preventDefault()
-          if (this.password === this.confirm_password && this.password.length > 0){
-            this.$http.post('/register', {
-              email: this.email,
-              password: this.password,
-              name: this.name,
-              regPassword: this.regPassword,
-              is_raceorganiser: this.is_raceorganiser
+            // check passwords are the same and off good length
+          if (_this.password === _this.confirm_password && _this.password.length > 0){
+            // register the user to the database
+            _this.$http.post('/register', {
+              email: _this.email,
+              password: _this.password,
+              name: _this.name,
+              regPassword: _this.regPassword,
+              is_raceorganiser: _this.is_raceorganiser
             })
               .then(response => {
+                // successful registration
                 _this.$swal("Registration Successful", response.data, "success")
                   .then(() => {
-                    this.$router.push('/login')
+                    _this.$router.push('/login')
                   })
 
               })
+              // registration error, reset fields
               .catch(error => {
                 _this.$swal("Registration Failed", error.response.data, "error");
                 _this.email = "";
@@ -87,8 +96,9 @@
                 console.log(error);
               });
           } else {
-            this.password = "";
-            this.confirm_password = "";
+            // error, passwords were not the same
+            _this.password = "";
+            _this.confirm_password = "";
             _this.$swal("Registration Failed", "Passwords were not the same", "error");
           }
         }

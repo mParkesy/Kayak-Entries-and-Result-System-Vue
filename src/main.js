@@ -1,5 +1,4 @@
-// The Vue build version to load with the `import` command
-// (runtime-only or standalone) has been set in webpack.base.conf with an alias.
+
 import Vue from 'vue'
 import App from './App'
 import router from './router'
@@ -14,6 +13,7 @@ import './assets/css/style.css';
 import VueSweetAlert from 'vue-sweetalert'
 Vue.use(VueSweetAlert);
 
+// import all components for use
 Vue.component("RaceResult", {
 
 })
@@ -32,24 +32,17 @@ Vue.component("Login", {
 
 import Axios from 'axios'
 
+/**
+ * Create an Axios instance for API calls and set the base URL
+ * @type {AxiosInstance}
+ */
 const base = Axios.create({
-  baseURL: 'http://localhost:3000'
+  baseURL: 'http://192.168.0.47:3000'
 })
 
-
-
-/*Vue.http.interceptors.push({
-  request: function (request){
-    request.headers.authorization = localStorage.getItem('jwt');
-    return request;
-  },
-
-  response: function (response) {
-    console.log(response);
-    return response;
-  }
-});*/
-
+/**
+ * Request interceptor to send jwt token in auth header
+ */
 base.interceptors.request.use(
   reqConfig => {
     reqConfig.headers['Authorization'] = localStorage.getItem('jwt');
@@ -59,11 +52,15 @@ base.interceptors.request.use(
   err => Promise.reject(err),
 );
 
+/**
+ * Response interceptor to see if user has access to API
+ */
 base.interceptors.response.use(
   res => {
-    console.log(res);
-    if(res.data === "no token provided"){
+    if(res.data === "no token provided") {
       window.location = "/?message=d41d8cd98f00b204e9800998ecf8427e";
+    }else if (res.data.status === 500){
+      window.location = "/?message=84b42204e14f78f4216ac0d9f7fa1db0";
     } else {
       return res;
     }
@@ -72,18 +69,8 @@ base.interceptors.response.use(
   err => Promise.reject(err),
 );
 
+// assign axios to vue reference http
 Vue.prototype.$http = base;
-
-/*base.interceptors.request.use(function (config) {
-  let token = localStorage.getItem('jwt');
-  if(token != null){
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-}, function (error) {
-  // Do something with request error
-  return Promise.reject(error);
-});*/
 
 /* eslint-disable no-new */
 new Vue({

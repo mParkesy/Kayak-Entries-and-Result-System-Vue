@@ -32,7 +32,9 @@ export default {
   },
   created(){
     let _this = this;
+    // load a races details
     _this.loadRace(function() {
+      // get all the boat numbers for a race
       _this.$http
         .get('/boatnumbers?id=' + _this.$route.params.id)
         .then(response => {
@@ -42,54 +44,41 @@ export default {
           console.log(error);
           _this.$swal("Failed to get all boat numbers", "Please try again", "error");
         })
+      // load all divisions in race and load results
       _this.loadDivisions();
       _this.loadResult();
+      // get user from local storage
       let user = JSON.parse(localStorage.getItem('user'));
-
+      // make sure user accessing this page owns the race
       if(_this.race.clubID == user.clubID){
         _this.canView = true;
       } else {
+        // not allowed access
         _this.canView = false;
         _this.$swal("Access Denied", "You may not run this race", "error")
           .then(() => {
             window.location = "/raceorganiser";
           })
       }
-     /* let points = {
-        regionID : _this.raceView.regionID,
-        clubID : _this.raceView.clubID,
-        points : 0,
-        raceID : _this.raceView.raceID
-      }
-      _this.$http
-        .post('/insertclubpoints', {
-          data : points
-        })
-        .then(reponse => {
-
-        })
-        .catch(error => {
-          _this.$swal("Failed to assign boat numbers", error.response.data, "error");
-          _this.errors.push(e)
-        })*/
-
     });
   },
   methods : {
-    loadRace(callback){
+    // load race function
+    loadRace(callback) {
       let _this = this;
+      // get race details
       _this.$http
-        .get('/race?id=' +_this.$route.params.id)
+        .get('/race?id=' + _this.$route.params.id)
         .then(response => {
           _this.race = response.data.response[0];
+          // split offset stopwatch times
           let divTimes = splitOffsets(_this.race.boatOffset);
-
-          if(divTimes.length != _this.form.divs.length){
-            for(let i = 0; i < divTimes.length; i++){
+          // get list of divisions and add to list form stopwatch start time form
+          if (divTimes.length != _this.form.divs.length) {
+            for (let i = 0; i < divTimes.length; i++) {
               _this.form.divs.push(divTimes[i].time);
             }
           }
-
           callback();
         })
         .catch(error => {
@@ -97,60 +86,64 @@ export default {
           console.log(error);
         })
     },
-    loadDivisions(){
+    // load divisions
+    loadDivisions() {
       let _this = this;
+      // get divisions in race
       _this.$http
         .get('/racedivisions?id=' + this.$route.params.id)
         .then(response => {
           _this.divisions = response.data.response;
-          /*_this.divisions.sort(function(a, b){
-            var x = a.raceDivision.toLowerCase();
-            var y = b.raceDivision.toLowerCase();
-            if (x < y) {return -1;}
-            if (x > y) {return 1;}
-            return 0;
-          });*/
         })
         .catch(error => {
-          _this.$swal("Failed to get race divisions", "Please try again", "error");
+          _this.$swal("Error", "Failed to get race divisions", "error");
           console.log(error);
         })
     },
-    loadResult(){
+    // load race results
+    loadResult() {
       let _this = this;
+      // get race results in order
       _this.$http
         .get('/raceresult_order?id=' + _this.$route.params.id)
         .then(response => {
           let x = response.data.response;
+          // sort the races into divisions
           _this.results = sortRaces(x);
 
         })
         .catch(e => {
           _this.errors.push(e)
+          console.log(e)
+          _this.$swal("Error", "Failed to get race results so far", "error");
         })
     },
-    handleStopwatch(evt){
+    // stopwatch start times submit
+    handleStopwatch(evt) {
       let _this = this;
       evt.preventDefault();
       let list = "";
-      console.log(_this.form.divs);
-      for(let i = 0; i < _this.form.divs.length; i++){
+      // loop over form
+      for (let i = 0; i < _this.form.divs.length; i++) {
         let value = _this.form.divs[i];
-        if(value === undefined){
-          value = "00:00";
+        // set value if undefined
+        if (value === undefined || value == "") {
+          value = "00:00:00";
         }
-        console.log(_this.divisions)
+        // add to list of race start times in format
         list = list + _this.divisions[i].raceDivision + "-" + value + ",";
 
       }
+      // send to database for update of race offsets
       _this.$http
         .post('/updateraceoffset', {
-          list : list,
-          raceID : _this.$route.params.id
+          list: list,
+          raceID: _this.$route.params.id
         })
         .then(response => {
+          // on success show message and update view
           _this.$swal("Stopwatch offsets submitted", "Division start times have been submitted, you can now input finish times", "success");
-          _this.loadRace(function() {
+          _this.loadRace(function () {
             _this.loadDivisions();
             _this.loadResult();
           });
@@ -162,75 +155,86 @@ export default {
 
 
     },
-    submitTime(boatnumber ,time){
+    // time submitted for paddler
+    submitTime(boatnumber, time) {
       let _this = this;
-      if(boatnumber == ""){
+      // check boat number is not empty
+      if (boatnumber == "") {
         _this.message = {
-          show : true,
-          type : "danger",
-          text : "Boat number cannot be empty"
+          show: true,
+          type: "danger",
+          text: "Boat number cannot be empty"
         };
       } else {
+        // get boat number division
         let div = boatnumber[0];
         let list = splitOffsets(_this.race.boatOffset);
         let newTime = "";
         // loop over offsets
-        for(let i = 0; i < list.length; i++){
+        for (let i = 0; i < list.length; i++) {
           // if div in offset list is div for boat number or its a k2 and outcome is finish then
-          if((list[i].div === div || (list[i].div.includes("_") && parseInt(boatnumber) > div + 50)) && (_this.selected === "Finish")){
+          if ((list[i].div === div || (list[i].div.includes("_") && parseInt(boatnumber) > div + 50)) && (_this.selected === "Finish")) {
             // calculate new time from offset
             newTime = secondsToHMS(hmsToSeconds(time) - hmsToSeconds(list[i].time));
-            // if outcome wasnt finish
+            // if outcome wasn't finish
           } else if (_this.selected === "RTD") {
             // set as retired
             newTime = "RTD";
-          } else if (_this.selected === "DNS"){
+          } else if (_this.selected === "DNS") {
             newTime = "DNS";
           }
         }
         let inList = false;
         let submitList = false;
-        if(includesBoatNumber(_this.raceBoatNumbers, boatnumber)) {
+        // check boat number is in list
+        if (includesBoatNumber(_this.raceBoatNumbers, boatnumber)) {
           inList = true;
-        } else if (includesBoatNumber(_this.submittedBoatNumbers, boatnumber)){
+          // check to see if time already submitted
+        } else if (includesBoatNumber(_this.submittedBoatNumbers, boatnumber)) {
           submitList = true;
+          // not in list? doesn't exist
         } else {
           _this.message = {
-            show : true,
-            type : "danger",
-            text : boatnumber + " doesn't exist in the system"
+            show: true,
+            type: "danger",
+            text: boatnumber + " doesn't exist in the system"
           };
         }
-        if(inList || submitList){
+        // if in a list
+        if (inList || submitList) {
+          // update boat time with new values
           _this.$http
             .post('/updateboattime', {
-              data : {
-                boatname : boatnumber,
-                racetime : newTime,
-                outcome : _this.selected,
-                raceID : _this.$route.params.id
+              data: {
+                boatname: boatnumber,
+                racetime: newTime,
+                outcome: _this.selected,
+                raceID: _this.$route.params.id
               }
             })
             .then(response => {
-              if(inList){
+              // if success and in list then remove from list
+              if (inList) {
                 _this.raceBoatNumbers.splice(_this.raceBoatNumbers.indexOf(boatnumber), 1);
                 let data = {
-                  boatname : _this.boatnumber
+                  boatname: _this.boatnumber
                 };
+                // add to submitted list instead
                 _this.submittedBoatNumbers.push(data);
                 _this.message = {
-                  show : true,
-                  type : "success",
-                  text : boatnumber + " submitted"
+                  show: true,
+                  type: "success",
+                  text: boatnumber + " submitted"
                 };
-              } else if (submitList){
+                // if in submitted list then inform user boat time was overwritten
+              } else if (submitList) {
                 _this.message = {
-                  show : true,
-                  type : "success",
-                  text : boatnumber + " time has been overwritten"
+                  show: true,
+                  type: "success",
+                  text: boatnumber + " time has been overwritten"
                 };
               }
-
+              // set values back to blank
               _this.boatnumber = "";
               _this.time = "";
               _this.selected = "Finish";
@@ -238,171 +242,189 @@ export default {
             })
             .catch(error => {
               _this.message = {
-                show : true,
-                type : "danger",
-                text : boatnumber + " failed to submit"
+                show: true,
+                type: "danger",
+                text: boatnumber + " failed to submit"
               };
             })
         }
       }
 
     },
-    submitPaddlerTime(){
+    // another way to submit a boat time
+    submitPaddlerTime() {
       let _this = this;
       _this.submitTime(_this.boatnumber, _this.time);
-/*      let _this = this;
-      let div = _this.boatnumber[0];
-      let list = splitOffsets(_this.race.boatOffset);
-      let newTime = "";
-      // loop over offsets
-      for(let i = 0; i < list.length; i++){
-        // if div in offset list is div for boat number or its a k2 and outcome is finish then
-        if((list[i].div === div || (list[i].div.includes("_") && parseInt(_this.boatnumber) > div + 50)) && (_this.selected === "Finish")){
-          // calculate new time from offset
-          newTime = secondsToHMS(hmsToSeconds(_this.time) - hmsToSeconds(list[i].time));
-          // if outcome wasnt finish
-        } else if (_this.selected === "RTD") {
-          // set as retired
-          newTime = "RTD";
-        } else if (_this.selected === "DNS"){
-          newTime = "DNS";
-        }
-      }
-
-      let inList = false;
-      let submitList = false;
-      if(includesBoatNumber(_this.raceBoatNumbers, _this.boatnumber)) {
-        inList = true;
-      } else if (includesBoatNumber(_this.submittedBoatNumbers, _this.boatnumber)){
-        submitList = true;
-      } else {
-        _this.message = {
-          show : true,
-          type : "danger",
-          text : _this.boatnumber + " doesn't exist in the system"
-        };
-      }
-      if(inList || submitList){
-        _this.$http
-          .post('/updateboattime', {
-            data : {
-              boatname : _this.boatnumber,
-              racetime : newTime,
-              outcome : _this.selected
-            }
-          })
-          .then(response => {
-            if(inList){
-              _this.raceBoatNumbers.splice(_this.raceBoatNumbers.indexOf(_this.boatnumber), 1);
-              let data = {
-                boatname : _this.boatnumber
-              };
-              _this.submittedBoatNumbers.push(data);
-              _this.message = {
-                show : true,
-                type : "success",
-                text : _this.boatnumber + " submitted"
-              };
-            } else if (submitList){
-              _this.message = {
-                show : true,
-                type : "success",
-                text : _this.boatnumber + " time has been overwritten"
-              };
+      /*      let _this = this;
+            let div = _this.boatnumber[0];
+            let list = splitOffsets(_this.race.boatOffset);
+            let newTime = "";
+            // loop over offsets
+            for(let i = 0; i < list.length; i++){
+              // if div in offset list is div for boat number or its a k2 and outcome is finish then
+              if((list[i].div === div || (list[i].div.includes("_") && parseInt(_this.boatnumber) > div + 50)) && (_this.selected === "Finish")){
+                // calculate new time from offset
+                newTime = secondsToHMS(hmsToSeconds(_this.time) - hmsToSeconds(list[i].time));
+                // if outcome wasnt finish
+              } else if (_this.selected === "RTD") {
+                // set as retired
+                newTime = "RTD";
+              } else if (_this.selected === "DNS"){
+                newTime = "DNS";
+              }
             }
 
-            _this.boatnumber = "";
-            _this.time = "";
-            _this.selected = "Finish";
-            _this.loadResult();
-          })
-          .catch(error => {
-            _this.message = {
-              show : true,
-              type : "danger",
-              text : _this.boatnumber + " failed to submit"
-            };
-          })
-      }*/
+            let inList = false;
+            let submitList = false;
+            if(includesBoatNumber(_this.raceBoatNumbers, _this.boatnumber)) {
+              inList = true;
+            } else if (includesBoatNumber(_this.submittedBoatNumbers, _this.boatnumber)){
+              submitList = true;
+            } else {
+              _this.message = {
+                show : true,
+                type : "danger",
+                text : _this.boatnumber + " doesn't exist in the system"
+              };
+            }
+            if(inList || submitList){
+              _this.$http
+                .post('/updateboattime', {
+                  data : {
+                    boatname : _this.boatnumber,
+                    racetime : newTime,
+                    outcome : _this.selected
+                  }
+                })
+                .then(response => {
+                  if(inList){
+                    _this.raceBoatNumbers.splice(_this.raceBoatNumbers.indexOf(_this.boatnumber), 1);
+                    let data = {
+                      boatname : _this.boatnumber
+                    };
+                    _this.submittedBoatNumbers.push(data);
+                    _this.message = {
+                      show : true,
+                      type : "success",
+                      text : _this.boatnumber + " submitted"
+                    };
+                  } else if (submitList){
+                    _this.message = {
+                      show : true,
+                      type : "success",
+                      text : _this.boatnumber + " time has been overwritten"
+                    };
+                  }
+
+                  _this.boatnumber = "";
+                  _this.time = "";
+                  _this.selected = "Finish";
+                  _this.loadResult();
+                })
+                .catch(error => {
+                  _this.message = {
+                    show : true,
+                    type : "danger",
+                    text : _this.boatnumber + " failed to submit"
+                  };
+                })
+            }*/
     },
-    handleModal(evt){
+    // for text box large submissions
+    handleModal(evt) {
       evt.preventDefault();
       let _this = this;
-      if(_this.textboxSubmission.length > 0){
+      // make sure data has been entered
+      if (_this.textboxSubmission.length > 0) {
+        // split line by line
         let list = _this.textboxSubmission.split('\n');
-        for(let i = 0; i < list.length; i++){
+        // then split by comma
+        for (let i = 0; i < list.length; i++) {
           let line = list[i].split(',');
+          // get rid of any spaces
           line[1] = line[1].replace(/\s+/g, '');
-          if(line[1] == "RTD"){
+          // set appropriate finish type
+          if (line[1] == "RTD") {
             _this.selected = "RTD";
-          } else if(line[1] == "DNS"){
+          } else if (line[1] == "DNS") {
             _this.selected = "DNS"
           } else {
             _this.selected = "Finish";
           }
+          // submit the time using function
           _this.submitTime(line[0], line[1]);
         }
+        // close modal
         _this.$nextTick(() => {
           // Wrapped in $nextTick to ensure DOM is rendered before closing
           _this.$refs.textModal.hide();
           _this.$swal("Submitted", "Paddler times have all been submitted", "success")
         })
       } else {
+        // close modal if no data in text box
         _this.$nextTick(() => {
           // Wrapped in $nextTick to ensure DOM is rendered before closing
           _this.$refs.textModal.hide();
         })
       }
     },
-    finishPhone(evt){
+    // email user to submit times on phone
+    finishPhone(evt) {
       evt.preventDefault();
       let _this = this;
-
+      // no email address provided
       if (!_this.inviteEmail) {
         _this.message = {
-          show : true,
-          type : "danger",
-          text : "No email address"
+          show: true,
+          type: "danger",
+          text: "No email address"
         };
-      } else if (!_this.validEmail(_this.inviteEmail)){
+        // check validation of email
+      } else if (!_this.validEmail(_this.inviteEmail)) {
         _this.message = {
-          show : true,
-          type : "danger",
-          text : "Invalid email address"
+          show: true,
+          type: "danger",
+          text: "Invalid email address"
         };
+        // if email address is fine
       } else {
+        // insert access token in database for this phone user
         _this.$http
           .post('/insertAccess', {
-            data : {
-              email : _this.inviteEmail,
-              access : 0,
-              raceid : this.$route.params.id,
-              accessType : 0
+            data: {
+              email: _this.inviteEmail,
+              access: 0,
+              raceid: this.$route.params.id,
+              accessType: 0
             }
           })
           .then(response => {
+            // close the modal when done
             _this.$nextTick(() => {
               // Wrapped in $nextTick to ensure DOM is rendered before closing
               _this.$refs.textModal.hide();
               _this.$swal("Email Sent", "The email was successfully sent", "success")
             })
           })
+          // on error
           .catch(error => {
             _this.$swal("Failed", "Failed to send email", "error")
+            console.log(error);
           })
       }
     },
-    submitAdvisor(){
+    // submit results to advisor
+    submitAdvisor() {
       let _this = this;
-      console.log(_this.race.regionID)
       let data = {
-        process : 1,
-        raceID : _this.$route.params.id,
-        region : _this.race.regionID
+        process: 1,
+        raceID: _this.$route.params.id,
+        region: _this.race.regionID
       }
+      // update race process to 1, this will then send the email to advisor
       _this.$http
-        .post('/updateraceprocess' , {
-          data : data
+        .post('/updateraceprocess', {
+          data: data
         })
         .then(response => {
           _this.$swal("Success", "Race updates complete", "success")
@@ -411,38 +433,46 @@ export default {
             })
         })
     },
+    // process race results
     processResults() {
       let _this = this;
       let noTimeList = [];
+      // build a list of boats that don't have times
       for (let i = 0; i < _this.raceBoatNumbers.length; i++) {
         console.log(_this.raceBoatNumbers[i].time + " : " + _this.raceBoatNumbers[i].boatname);
-        if (_this.raceBoatNumbers.time == null ) {
+        if (_this.raceBoatNumbers.time == null) {
           noTimeList.push(_this.raceBoatNumbers[i]);
         }
       }
+
+      // if the list has contents
       if (noTimeList.length > 0) {
+        // build a warning of what boats need results
         let sweetText = "Boat times are missing for the following boats:<br>";
-        for(let x = 0; x < noTimeList.length; x++){
+        for (let x = 0; x < noTimeList.length; x++) {
           sweetText = sweetText + noTimeList[x].boatname + "<br>";
         }
+        // display warning
         _this.$swal("Boat times missing.",
           sweetText, "error");
       } else {
+        // if all times then send process results function
         let data = {
-          raceID : this.$route.params.id,
-          processType : 0
+          raceID: this.$route.params.id,
+          processType: 0
         }
         _this.$http
-          .post('/processresults' , {
-            data : data
+          .post('/processresults', {
+            data: data
           })
           .then(response => {
             _this.$swal("Success", "Race processed", "success")
           })
+          // check error type
           .catch(error => {
-            if(error.response.status == 428){
+            if (error.response.status == 428) {
               _this.$swal("Time error", "Not all paddler times are filled in", "error");
-            } else if (error.response.status == 400){
+            } else if (error.response.status == 400) {
               _this.$swal("Processing error", "Please try again soon and make sure all details are filled in", "error");
             } else {
               _this.$swal("Fail", "Failed to process results, please try again", "error");
@@ -451,22 +481,10 @@ export default {
           })
       }
     },
-    validEmail(email){
+    // valid email checker
+    validEmail(email) {
       var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       return re.test(email);
-    },
-    getPDF(){
-      let _this = this;
-      let user = JSON.parse(localStorage.getItem('user'));
-      _this.$http
-        .get('/clubraceentries?raceid=' + this.$route.params.id + "&clubid=" + user.clubID)
-        .then(response => {
-          let row = response.data.response;
-          console.log(row);
-        })
-        .catch(error => {
-          _this.$swal("Failed to submit stopwatch times", "Please try again", "error");
-        })
     }
   }
 }

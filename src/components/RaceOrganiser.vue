@@ -1,3 +1,8 @@
+<!--
+  This is the race organiser component where the organiser can make a race and see the details to do with
+  the races they have organised.
+-->
+
 <template>
   <div id="raceorganiser" class="py-4">
     <b-container class="text-center mx-auto">
@@ -136,7 +141,7 @@
                       <td>{{ line.boatname }}</td>
                       <td>{{ line.name }}</td>
                       <td>{{ line.clubcode }}</td>
-                      <td>{{ line.division }}</td>
+                      <td>{{ line.raceDivision }}</td>
                       <td><a v-on:click="paddlerRemoved(index)"><i class="fas fa-minus-circle minus"></i></a></td>
                     </tr>
                     </tbody>
@@ -187,8 +192,10 @@
           }
         },
         created() {
+          // get local storage user
           let user = JSON.parse(localStorage.getItem('user'));
           let _this= this;
+          //get races organised by club
             _this.$http
               .get('/getclubraces?id=' + user.clubID)
               .then(response => {
@@ -198,6 +205,7 @@
                 _this.$swal("You have no races", "", "error");
                 console.log(error)
               })
+          // get details of club
           _this.$http
             .get('/club?id='+user.clubID)
             .then(response => {
@@ -206,12 +214,15 @@
 
         },
         methods : {
+          // when new race submitted
           handleSubmit(e){
             e.preventDefault();
             let _this= this;
             let userID = JSON.parse(localStorage.getItem('user')).clubID;
             let year = _this.form.date.substring(0, 4);
+            // convert date to uk format
             let newDate = htmlDateToUK(_this.form.date);
+            // insert race into database
             this.$http.post('/insertrace', {
               name  : _this.form.racename,
               date : newDate,
@@ -225,43 +236,52 @@
                     this.$router.go();
                   })
               })
+              // if fail insert then show error
               .catch(error => {
-                _this.$swal("Race add Failed", error.response.data, "error");
+                console.log(error)
+                _this.$swal("Race add Failed", "Please try again", "error");
               });
           },
           handleUpdateOk(e){
+            // if ok button pressed on race update details then run update function
             e.preventDefault();
             this.handleUpdateSubmit();
           },
           handleUpdateSubmit(){
             let _this= this;
+            // get year and date in uk format
             let year = _this.raceView.date.substring(0, 4);
             let date = htmlDateToUK(_this.raceView.date);
+            // update the race on teh database
             this.$http.post('/updaterace', {
               name  : _this.raceView.raceName,
               date : date,
               year: year,
               raceID : _this.raceView.raceID,
             })
+              // if successfull then close the modal
               .then(response => {
                 this.$nextTick(() => {
                   this.$refs.modal.hide()
                 })
                 _this.$swal("Success", "The race has been updated.", "success")
-                  .then(() => {
-                  })
               })
+              // if update failed
               .catch(error => {
-                _this.$swal("Race update Failed", error.response.data, "error");
+                console.log(error);
+                _this.$swal("Race update Failed", "Please try again", "error");
               });
           },
+          // get race info when a race in list is selected
           getRaceInfo(race){
             let _this= this;
+            // store needed fields
             _this.raceView = race;
             _this.raceView.date = UKTohtmlDate(_this.raceView.date);
             _this.raceShow = true;
             _this.showDiv = false;
             _this.entryNumbers = [];
+            // get all race results so far
             this.$http
               .get('/raceresult_number?id=' + race.raceID)
               .then(response => {
@@ -269,14 +289,17 @@
                 _this.results = results;
               })
               .catch(e => {
+                console.log(e);s
                 this.errors.push(e)
               })
+            // get paddlers entered into the whole race in different format to above
             _this.$http
               .get('/getracepaddlers?id=' + race.raceID)
               .then(response => {
                 let result = response.data.response;
                 _this.allRacersEntered = result;
                 let clubs = [];
+                // collect each club for the paddlers entered
                 for(let i = 0; i < _this.allRacersEntered.length; i++) {
                   let club = {
                     value: _this.allRacersEntered[i].clubcode,
@@ -285,22 +308,28 @@
                   clubs.push(club);
 
                 }
+                // make sure club list only has unique values
                 _this.clubList = [...new Set(clubs.map(x => x.value))];
               })
               .catch(e => {
-                this.errors.push(e)
+                console.log(e);
+                _this.errors.push(e)
               })
 
 
           },
+          // sends to page with club entries for race
           getClubEntries(){
             let _this = this;
+            // assign numbers for changing page
             _this.assignNumbers();
             if(_this.selected != null){
+              // get club details by club code
               _this.$http
                 .get('clubbycode?code=' + _this.selected)
                 .then(response => {
                   let clubID = response.data[0].clubID;
+                  // send entries list page
                   window.location = "/clubentries/" + _this.raceView.raceID + "/" + clubID;
                 })
                 .catch(error => {
@@ -309,67 +338,80 @@
                 })
             }
           },
+          // see the results/entries for a division so far
           seeDivision(race, selected){
             let _this = this;
             _this.divRace = race;
             _this.selected = selected;
             _this.showDiv = true;
           },
+          // assigns a boat number to each boat
           assignNumbers(){
             let _this = this;
             let divList = [];
             for(let i = 0; i < _this.results.length; i++){
+              // gets a list of divs
               divList.push(_this.results[i][0].raceDivision);
             }
             let data = {
               raceID : _this.raceView.raceID,
               divList : divList
             }
+            // sends the race ID and list of divisions that need boat numbers assigning to back end
             _this.$http
               .post('/assignboatnumbers', {
                 data : data
             })
               .then(response => {
-
+                // if successfull reload race details so boat numbers are shown
                 _this.$swal("Success", "Boat numbers have been assigned.", "success")
                   .then(() => {
                     _this.getRaceInfo(_this.raceView);
                   })
             })
               .catch(error => {
-                _this.$swal("Failed to assign boat numbers", error.response.data, "error");
+                _this.$swal("Failed to assign boat numbers", "Please try again", "error");
                 _this.errors.push(e)
+                console.log(e);
               })
           },
+          // close the dropdown
           closeDropdown(){
             let _this = this;
             _this.dropdown = false;
           },
+          // if a paddler has been selected from the search field
           selectSearch(paddler){
             let _this = this;
             let duplicate = false;
+            // check to see if duplicate entry
             for(let i = 0; i < _this.allRacersEntered.length; i ++){
               let current = _this.allRacersEntered[i];
               if(paddler.paddlerID == current.paddlerID){
                 duplicate = true;
               }
             }
+            // if duplicate send message to view
             if(duplicate) {
               _this.message = {
                 show: true,
                 type: "danger",
                 text: "Duplicate Entry"
               };
+              // if first paddler in entry then assign to paddler 1
             } else if(Object.keys(_this.paddler1).length === 0){
               _this.paddler1 = paddler;
+              // if second paddler then its a K2 being entered
             } else if(Object.keys(_this.paddler1).length > 0 && Object.keys(_this.paddler2).length === 0){
               _this.paddler2 = paddler;
             }
             _this.dropdown = false;
             _this.search = "";
           },
+          // when a organiser entry is being submitted
           enterPaddlerSubmit(){
             let _this = this;
+            // work out if k1 or k2 entry
             let paddler1_length = Object.keys(_this.paddler1).length;
             let paddler2_length = Object.keys(_this.paddler2).length;
             if(paddler1_length > 0 && paddler2_length === 0){
@@ -378,12 +420,12 @@
               _this.paddler1 = [];
               _this.paddler2 = [];
               _this.message = {};
-              console.log("k1")
             } else if (paddler1_length > 0 && paddler2_length > 0){
               // k2 entry
-              console.log("k2")
+              // get new div for k2
               let newDiv = Math.floor((parseInt(_this.paddler1.division) + parseInt(_this.paddler2.division)) / 2);
               newDiv = newDiv + "_" + newDiv;
+              // insert boat result
               _this.$http
                 .post('/insertboatresult',{
                   race : _this.raceView.raceID,
@@ -391,9 +433,8 @@
                 })
                 .then(response => {
                   let boatID = response.data.response.insertId;
-
+                  // use insert id to insert paddler boat to determine paddlers in a boat
                   let paddlerIDList = [_this.paddler1.paddlerID, _this.paddler2.paddlerID];
-                  console.log(_this.paddler1);
                   for(let i = 0; i < 2; i++){
                     _this.$http
                       .post('/insertpaddlerboat', {
@@ -401,6 +442,7 @@
                         paddlerid : paddlerIDList[i]
                       })
                       .then(response2 => {
+                        // complete so clear arrays
                         _this.paddler1 = [];
                         _this.paddler2 = [];
                         _this.message = {};
@@ -412,6 +454,7 @@
                         _this.getRaceInfo(_this.raceView);
                       })
                       .catch(e => {
+                        // send error message
                         _this.message = {
                           show : true,
                           type : "danger",
@@ -422,6 +465,7 @@
                   }
                 })
                 .catch(e => {
+                  // send error message
                   _this.message = {
                     show : true,
                     type : "danger",
@@ -430,6 +474,7 @@
                   console.log(e);
                 })
             } else {
+              // no entry, clear arrays
               _this.message = {
                 show : true,
                 type : "danger",
@@ -441,15 +486,18 @@
               _this.getRaceInfo(_this.raceView);
             }
           },
+          // add a paddler function
           addPaddler(paddler){
             let _this = this;
             let duplicate = false;
+            // checks to see if duplicate entry
             for(let i = 0; i < _this.allRacersEntered.length; i ++){
                 let current = _this.allRacersEntered[i];
                 if(paddler.paddlerID == current.paddlerID){
                   duplicate = true;
                 }
             }
+            // if duplicate send error message
             if(duplicate){
               _this.message = {
                 show : true,
@@ -457,12 +505,14 @@
                 text : "Duplicate Entry"
               };
             } else {
+              // insert boat result field
               _this.$http
                 .post('/insertboatresult', {
                   race : _this.raceView.raceID,
                   div : paddler.division
                 })
                 .then(response => {
+                  // use insert if to insert the paddler boat field
                   let boatID = response.data.response.insertId;
                   _this.$http
                     .post('/insertpaddlerboat', {
@@ -470,6 +520,7 @@
                       paddlerid : paddler.paddlerID
                     })
                     .then(response2 => {
+                      // success message
                       _this.message = {
                         show : true,
                         type : "success",
@@ -479,6 +530,8 @@
                       _this.search = "";
                     })
                     .catch(e => {
+                      // error message
+                      console.log(e);
                       _this.$swal("Entry error", "The page will now refresh, please check and see what entries were submitted and correct any errors.", "error")
                         .then(() => {
                           this.$router.go();
@@ -486,6 +539,7 @@
                     })
                 })
                 .catch(e => {
+                  //error message
                   _this.$swal("Entry error", "The page will now refresh, please check and see what entries were submitted and correct any errors.", "error")
                     .then(() => {
                       this.$router.go();
@@ -494,20 +548,24 @@
                 })
             }
           },
+          // if a paddler entry is removed
           paddlerRemoved(index){
             let _this = this;
+            // get boat id
             let boatID = _this.divRace[index].boatID;
-
+            // send boat id to database for entry to be deleted
             _this.$http
               .post('/deleteentry', {
                 boatid : boatID
               })
               .then(response => {
+                // remove from local lists and force update component
                 _this.divRace.splice(index, 1);
                 _this.getRaceInfo(_this.raceView);
                 _this.$forceUpdate();
               })
               .catch(e => {
+                // error message
                 console.log(e);
                 _this.$swal("Failed to delete entry", "If the error persists please contact an administrator", "error");
               })
@@ -516,15 +574,19 @@
 
         },
       watch: {
+          // search function
         search: function() {
           let _this = this;
+          // if search length is greater than 3
           if(_this.search.length >= 3){
             _this.message = {};
             _this.dropdown = true;
+            // search database for term
             _this.$http
               .get('search?term=' + _this.search)
               .then(response => {
                 _this.paddlerSearchResults = response.data.response;
+                // if there are no results inform user
                 if(_this.paddlerSearchResults.length === 0){
                   _this.message = {
                     show : true,
@@ -532,14 +594,17 @@
                     text : "No search results"
                   };
                 } else if (_this.paddlerSearchResults.length === 1){
-                  //this.handlePaddler(this.paddlers[0]);
                 }
               })
               .catch(error => {
-                _this.$swal("Search error", error.response.data, "error");
+                // error message
+                console.log(error)
+                _this.$swal("Search error", "Please try again", "error");
               })
           } else {
-            _this.closeDropdown();
+            // close search dropdown
+            _this.closeDropdown(
+            );
           }
         },
       }
