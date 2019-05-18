@@ -72,8 +72,12 @@
         // if thee message passed the home page is of a certain type then open error alert
         if(_this.$route.query.message === "d41d8cd98f00b204e9800998ecf8427e"){
           _this.$swal("Error", "Please login to get that information.", "error")
+          localStorage.removeItem("jwt");
+          localStorage.removeItem("user");
         } else if (_this.$route.query.message === "84b42204e14f78f4216ac0d9f7fa1db0"){
           _this.$swal("Error", "The results system is currently down, please try again soon.", "error")
+          localStorage.removeItem("jwt");
+          localStorage.removeItem("user");
         }
       }
     }

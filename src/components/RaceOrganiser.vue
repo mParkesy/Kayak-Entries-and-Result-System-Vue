@@ -322,7 +322,10 @@
           getClubEntries(){
             let _this = this;
             // assign numbers for changing page
-            _this.assignNumbers();
+            if(_this.raceView.processed === 0){
+              _this.assignNumbers();
+            }
+
             if(_this.selected != null){
               // get club details by club code
               _this.$http

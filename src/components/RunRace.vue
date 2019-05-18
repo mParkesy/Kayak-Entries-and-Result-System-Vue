@@ -19,7 +19,7 @@
           <router-link :to="{ name: 'adminresult', params: { id: race.raceID }}">
             <b-button class="m-1" type="submit" variant="primary">See Results</b-button>
           </router-link>
-          <b-button class="m-1" v-on:click="submitAdvisor" type="submit" variant="primary">Submit Results</b-button>
+          <b-button class="m-1" v-if="resultsProcessed" v-on:click="submitAdvisor" type="submit" variant="primary">Submit Results</b-button>
         </b-col>
       </b-row>
       <b-modal

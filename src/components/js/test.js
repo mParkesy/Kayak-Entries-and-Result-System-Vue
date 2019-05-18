@@ -27,7 +27,8 @@ export default {
       results: [],
       textboxSubmission: "",
       inviteEmail : "",
-      canView : false
+      canView : false,
+      resultsProcessed : false
     }
   },
   created(){
@@ -173,7 +174,13 @@ export default {
         // loop over offsets
         for (let i = 0; i < list.length; i++) {
           // if div in offset list is div for boat number or its a k2 and outcome is finish then
-          if ((list[i].div === div || (list[i].div.includes("_") && parseInt(boatnumber) > div + 50)) && (_this.selected === "Finish")) {
+/*          console.log("Current Div in list:" + list[i].div);
+          console.log("Paddler Div:" + div);
+          console.log("Boat number:" + boatnumber);
+          console.log("Div + 50:" + div + 50);
+          console.log("Div type: " + typeof(data));
+          console.log("Finish type: " + _this.selected);*/
+          if ((list[i].div === div || (list[i].div === (div + "_" + div) && parseInt(boatnumber) > div + 50)) && (_this.selected === "Finish")) {
             // calculate new time from offset
             newTime = secondsToHMS(hmsToSeconds(time) - hmsToSeconds(list[i].time));
             // if outcome wasn't finish
@@ -467,6 +474,7 @@ export default {
           })
           .then(response => {
             _this.$swal("Success", "Race processed", "success")
+            _this.resultsProcessed = true;
           })
           // check error type
           .catch(error => {

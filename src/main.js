@@ -37,7 +37,8 @@ import Axios from 'axios'
  * @type {AxiosInstance}
  */
 const base = Axios.create({
-  baseURL: 'http://192.168.0.47:3000'
+  //baseURL: 'http://192.168.0.47:3000'
+  baseURL: 'localhost:3000'
 })
 
 /**
@@ -57,6 +58,7 @@ base.interceptors.request.use(
  */
 base.interceptors.response.use(
   res => {
+    console.log(res.data)
     if(res.data === "no token provided") {
       window.location = "/?message=d41d8cd98f00b204e9800998ecf8427e";
     }else if (res.data.status === 500){
