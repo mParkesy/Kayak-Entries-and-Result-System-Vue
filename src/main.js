@@ -38,7 +38,7 @@ import Axios from 'axios'
  */
 const base = Axios.create({
   //baseURL: 'http://192.168.0.47:3000'
-  baseURL: 'localhost:3000'
+  baseURL: 'http://localhost:3000'
 })
 
 /**

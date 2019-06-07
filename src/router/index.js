@@ -134,7 +134,7 @@ router.beforeEach((to, from, next) => {
       let user = JSON.parse(localStorage.getItem('user'))
       let is_organiser = 0;
 
-      Axios.post('localhost:3000/isorganiser', {
+      Axios.post('http://localhost:3000/isorganiser', {
         userID : user.userID
       })
         .then(response => {
