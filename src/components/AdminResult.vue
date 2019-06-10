@@ -10,6 +10,7 @@
         <h1> {{ racename }}</h1>
       </b-row>
       <b-form @submit="handleSubmit">
+        <h2 v-if="race.length == 0">There are no results for this race.</h2>
       <b-row v-for="(result) in race" :key="result.raceID" class="col-lg-12">
         <h2 style="text-align: left; font-size: 28px; font-weight: 600;"> Div {{ result[0].raceDivision }} </h2>
           <table class="table col-lg-12 mt-2 results" v-bind:class="result[0].raceDivision.includes('_') ? ' k2Table ' : {} ">
@@ -245,6 +246,7 @@
 
   #adminresult {
     background-color: rgb(228, 229, 231);
+    height: calc(100vh - 56px);
   }
 
   @media only screen and (max-width: 730px) {

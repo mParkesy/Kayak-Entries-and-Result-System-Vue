@@ -6,7 +6,7 @@
 <template>
   <div id="raceorganiser" class="py-4">
     <b-container class="text-center mx-auto">
-      <b-modal hide-footer centered id="enterPaddler" ref="enterPaddler" title="Enter Paddler">
+      <b-modal @hidden="onHidden" @shown="focusMyElement" hide-footer centered id="enterPaddler" ref="enterPaddler" title="Enter Paddler" @e>
         <b-alert class="my-2 mx-3" :show="message.show" :variant="message.type">{{ message.text }}</b-alert>
         Type the paddlers name and click ok.
         If you are entering a K2, search another name before pressing Ok.
@@ -28,7 +28,7 @@
           <b-button v-on:click="enterPaddlerSubmit()" class="mt-3 py-1 px-4" size="sm" variant="primary">Submit</b-button>
         </b-form>
       </b-modal>
-      <b-modal id="editRace" ref="modal" title="Edit Race" @ok="handleUpdateOk">
+      <b-modal id="editRace" ref="modal" centered title="Edit Race" @ok="handleUpdateOk">
         <b-form class="form" @submit.stop.prevent="handleUpdateSubmit">
           <b-form-group label="Race name: ">
             <b-form-input
@@ -119,7 +119,10 @@
                 <p v-if="results.length == 0" class="text-left mb-0">There are no entries...</p>
                 <b-list-group class="my-2">
                   <b-list-group-item button class="d-flex justify-content-between align-items-center text-dark raceName" v-for="x in results" :key="x.name" v-on:click="seeDivision(x,  x[0].raceDivision)">
-                    {{ x[0].raceDivision }}
+                    <span v-if="x[0].raceDivision.includes('Div')">{{ x[0].raceDivision }}</span>
+                    <span v-if="x[0].raceDivision.includes('U')">{{ x[0].raceDivision }}</span>
+                    <span v-if="!(x[0].raceDivision.includes('Div')) && !(x[0].raceDivision.includes('U'))">Div {{ x[0].raceDivision }}</span>
+
                     <b-badge variant="primary" pill>{{ x.length }}</b-badge>
                   </b-list-group-item>
                 </b-list-group>
@@ -423,6 +426,7 @@
               _this.paddler1 = [];
               _this.paddler2 = [];
               _this.message = {};
+              _this.focusMyElement();
             } else if (paddler1_length > 0 && paddler2_length > 0){
               // k2 entry
               // get new div for k2
@@ -455,6 +459,7 @@
                           text : "K2 entry submitted"
                         };
                         _this.getRaceInfo(_this.raceView);
+                        _this.focusMyElement();
                       })
                       .catch(e => {
                         // send error message
@@ -531,6 +536,7 @@
                       };
                       _this.dropdown = false;
                       _this.search = "";
+                      _this.getRaceInfo(_this.raceView);
                     })
                     .catch(e => {
                       // error message
@@ -574,7 +580,16 @@
               })
 
           },
-
+          focusMyElement(e) {
+            this.$refs.search.focus()
+          },
+          onHidden(e) {
+            let _this = this;
+            _this.paddler1 = [];
+            _this.paddler2 = [];
+            _this.message = {};
+            _this.getRaceInfo(_this.raceView);
+          }
         },
       watch: {
           // search function
@@ -610,7 +625,7 @@
             );
           }
         },
-      }
+      },
     }
 </script>
 

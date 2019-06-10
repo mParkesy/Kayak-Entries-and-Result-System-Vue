@@ -67,6 +67,8 @@
               .catch(error => {
                 _this.$swal("Search error", error.response.data, "error");
               })
+          } else if (_this.search.length == 0){
+            _this.dropdown = false;
           }
         }
       },

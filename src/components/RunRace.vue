@@ -39,7 +39,7 @@
         size="m"
         centered
         title="Invite phone user for time input"
-        ref="textModal"
+        ref="textPhone"
       >
         <p>
           Type the email address of the person that you would like to have access to
@@ -47,7 +47,7 @@
           They will need to click the link in the email to get access.
         </p>
         <b-form-input type="email" v-model="inviteEmail" placeholder="Email Address"></b-form-input>
-        <b-alert class="mt-3 mb-0" :show="message.show" :variant="message.type">{{ message.text }}</b-alert>
+        <b-alert class="mt-3 mb-0" :show="message2.show" :variant="message2.type">{{ message2.text }}</b-alert>
       </b-modal>
       <b-modal
         @ok="handleModal"
@@ -146,6 +146,7 @@
 <style scoped>
   #runrace {
     background-color: rgb(228, 229, 231);
+    height: calc(100vh - 56px);
   }
 
   @media only screen and (max-width: 767px) {

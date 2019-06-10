@@ -7,7 +7,7 @@
     <div class="masthead text-center text-white d-flex ">
       <div class="container my-auto">
         <div class="row">
-          <div class="col-md-8 mx-auto text-center">
+          <div class="col-lg-4 mx-auto text-center">
             <h1 class="text-uppercase">
               <strong>Register</strong>
             </h1>

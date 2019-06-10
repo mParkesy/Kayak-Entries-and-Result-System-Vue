@@ -212,11 +212,13 @@
         checkDuplicate(index) {
           let _this = this;
           let duplicate = false;
+
           // loop over all racers entered and check
           for (let i = 0; i < _this.allRacersEntered.length; i++) {
             if (_this.allRacersEntered[i].paddlerID === _this.paddlers[index].paddlerID) {
               _this.$swal("Duplicate Entry", "This paddler has already been entered.", "error");
               duplicate = true;
+              console.log(_this.allRacersEntered[i].paddlerID + " against " + _this.paddlers[index].paddlerID)
             }
           }
 
@@ -225,6 +227,7 @@
             if (_this.submittedEntries[i].paddlerID === _this.paddlers[index].paddlerID) {
               _this.$swal("Duplicate Entry", "This paddler has already been entered.", "error");
               duplicate = true;
+              console.log(_this.submittedEntries[i].paddlerID + " against " + _this.paddlers[index].paddlerID)
             }
           }
 
@@ -271,6 +274,7 @@
           let user = JSON.parse(localStorage.getItem('user'));
           // if submitted entries
           if(option == 0){
+            console.log("test4")
             // submittedEntries
             let boatID = _this.submittedEntries[index].boatID;
             // delete the entry in the database
@@ -286,6 +290,12 @@
                   }
                 }
                 _this.submittedEntries.splice(index, 1);
+                console.log(_this.submittedEntries)
+                for(let x = _this.allRacersEntered.length -1; x >= 0; x--){
+                  if(_this.allRacersEntered[x].boatID == boatID){
+                    _this.allRacersEntered.splice(x, 1);
+                  }
+                }
                 this.$forceUpdate();
               })
               .catch(e => {
@@ -373,6 +383,7 @@
                 })
                 .then(response => {
                   let boatID = response.data.response.insertId;
+                  console.log(boatID)
                   // use returned boat ID to fill out paddler boat table
                   _this.$http
                     .post('/insertpaddlerboat', {
@@ -519,6 +530,7 @@
 
   #raceentries {
     background-color: rgba(203, 205, 206, 0.3);
+    height: 100%;
   }
 
   .table-bordered {
@@ -573,10 +585,6 @@
 
     #mobileEntries {
       padding-left: 0px;
-    }
-
-    #raceentries {
-      height: calc(100vh - 56px);
     }
 
     #mobileText {

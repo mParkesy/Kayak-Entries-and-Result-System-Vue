@@ -55,6 +55,8 @@
         selectYear : 0,
         selectRegion: 0,
         selectRegionName: "",
+        filterCheck : 0,
+        sweetOpen: false
       }
     },
     methods : {
@@ -79,8 +81,16 @@
               _this.selectYear--;
               _this.selectRegion = 11;
               _this.selectRegionName = "ALL";
-              _this.getRaces(_this.selectYear, _this.selectRegion, _this.selectRegionName);
-              _this.$swal("No results", "There were no results for that search filter", "error");
+              if(_this.filterCheck != 0 && _this.sweetOpen == false){
+                _this.$swal("No results", "There were no results for that search filter", "error")
+                  .then(() => {
+                    _this.getRaces(_this.years.slice(-1)[0].year, _this.selectRegion, _this.selectRegionName);
+                  })
+                _this.sweetOpen = true;
+              } else {
+                _this.getRaces(_this.selectYear, _this.selectRegion, _this.selectRegionName);
+              }
+              _this.filterCheck++;
             } else {
             }
           })
